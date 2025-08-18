@@ -1,5 +1,5 @@
-import { NotificationStore } from "./NotificationStore.js";
-import { showNotification } from "../../components/notifications/Notification.js";
+import { NotificationStore } from "@/app/core/NotificationStore.js";
+import { showNotification } from "@/components/notifications/Notification.js";
 
 export class NotificationService {
   constructor(app) {

@@ -1,9 +1,14 @@
-import Router from "@app/core/Router.js";
 import { EventBus } from "@app/core/EventBus.js";
 import { Store } from "@app/core/Store.js";
-import ApiService from "@/services/ApiService";
-import StorageService from "@/services/StorageService";
-import { NotificationService } from "@/services/NotificationService";
+import ApiService from "@services/ApiService.js";
+import StorageService from "@services/StorageService.js";
+import { NotificationService } from "@services/NotificationService.js";
+import { AuthService } from "@features/authentification/AuthService.js";
+import { AuthController } from "@features/authentification/AuthController.js";
+import { Router } from "@app/core/router/Router.js";
+import { authRoutes } from "@features/authentification/AuthRoute.js";
+import { AuthLayout } from "@layout/AuthLayout.js";
+import { hydrateStoreFromLocalStorage } from "@/utils/HydrateStore";
 
 
 export class App {
@@ -18,12 +23,20 @@ export class App {
     };
 
     this.services.notifications = new NotificationService(this);
+    this.services.auth = new AuthService(this)
 
-    this.controllers = {};
+    this.controllers = {
+      auth : new AuthController(this)
+    };
 
     this.router = new Router(this, {
       mode: "history",
     });
+
+    this.router.addLayout("auth", AuthLayout)
+
+    this.router.addRoutes(authRoutes)
+
 
     this.initModules();
     hydrateStoreFromLocalStorage(this.store, this.services.storage);

@@ -1,12 +1,21 @@
 import "@assets/style.css"
+import { App } from "@app/App.js"
 
 
-document.querySelector('#app').innerHTML = `
-  <div class="container mx-auto">
-    <h1 class="text-3xl font-bold underline text-blue-500">
-      Hello Vite + Tailwind CSS!
-    </h1>
-  </div>
-`
+const config = {
+  apiBaseUrl: import.meta.env.VITE_API_URL,
+  initialState: {
+    user: null,
+    isAuthenticated: false,
+    role: null,
+  },
+};
 
-setupCounter(document.querySelector('#counter'))
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("VITE_API_URL =", import.meta.env.VITE_API_URL);
+
+  const app = new App(config);
+  window.app = app;
+
+  console.log("Application initialisée", window.app);
+});
