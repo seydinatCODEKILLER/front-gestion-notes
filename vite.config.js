@@ -15,6 +15,7 @@ export default defineConfig(({mode}) => {
         "@config": path.resolve(__dirname, "./src/config"),
         "@app": path.resolve(__dirname, "./src/app"),
         "@assets": path.resolve(__dirname, "./src/assets"),
+        "@layout": path.resolve(__dirname, "./src/layout"),
       },
     },
     server: {

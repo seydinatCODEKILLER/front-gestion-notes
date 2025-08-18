@@ -16,7 +16,7 @@ class Router {
       mode: "history",
       scrollRestoration: "manual",
       defaultLayout: "default",
-      cacheSize: 0, // Nombre max de vues en cache
+      cacheSize: 10, // Nombre max de vues en cache
       strict: false, // Respect de la casse et slash final
       sensitive: false, // Sensibilité à la casse
       ...config,
@@ -193,18 +193,23 @@ class Router {
         route.component = (await route._component()).default;
       }
 
-      // Vérification du cache
+      // Génération de la clé
       const cacheKey = this.getCacheKey(route, params);
-      let view = this.cache.get(cacheKey);
+
+      let view = null;
+
+      // MODIF CACHE : Ne pas utiliser le cache si noCache = true
+      if (!route.meta?.noCache) {
+        view = this.cache.get(cacheKey);
+      }
 
       if (!view) {
-        // Création de la vue
+        // Création d'une nouvelle vue
         view = new route.component(this.app, { params, route });
 
-        // Mise en cache
-        if (this.config.cacheSize > 0) {
+        // Stockage en cache si activé et pas noCache
+        if (this.config.cacheSize > 0 && !route.meta?.noCache) {
           this.cache.set(cacheKey, view);
-          // Limite la taille du cache
           if (this.cache.size > this.config.cacheSize) {
             const firstKey = this.cache.keys().next().value;
             this.cache.delete(firstKey);
@@ -220,17 +225,23 @@ class Router {
       const layoutChanged =
         !this.currentLayout || this.currentLayout.constructor !== LayoutClass;
 
-      // Changement de layout si nécessaire
       if (layoutChanged) {
         await this.destroyCurrentLayout();
         this.currentLayout = new LayoutClass(this.app);
         await this.currentLayout.setup();
+
+        // Initialise l'état actif de la sidebar
+        if (this.currentLayout.getSidebarInstance) {
+          const sidebar = this.currentLayout.getSidebarInstance();
+          if (sidebar) {
+            sidebar.onRouteChange(this.getCurrentPath());
+          }
+        }
       }
 
-      // Destruction de l'ancienne vue
+      // Destruction de l'ancienne vue si nécessaire
       await this.destroyCurrentView();
 
-      // Mise à jour des références
       this.previousRoute = this.currentRoute;
       this.currentRoute = route;
       this.currentView = view;
@@ -241,12 +252,29 @@ class Router {
       await this.currentLayout.renderView(view);
       document.title = this.getPageTitle(view, route);
 
+      // Met à jour la sidebar après le rendu
+      if (this.currentLayout.getSidebarInstance) {
+        const sidebar = this.currentLayout.getSidebarInstance();
+        if (sidebar && sidebar.onRouteChange) {
+          sidebar.onRouteChange(this.getCurrentPath());
+        }
+      }
+
       // Middlewares "after"
       await this.runMiddlewares(route, "afterResolve", view);
       this.handleScroll(route);
     } catch (error) {
       console.error("Routing error:", error);
       this.handleError(error);
+    }
+  }
+
+  // MODIF CACHE : Méthode pour invalider le cache d'une route
+  invalidateRouteCache(path, params = {}) {
+    const matched = this.matchRoute(path);
+    if (matched) {
+      const key = this.getCacheKey(matched.route, params);
+      this.cache.delete(key);
     }
   }
 
