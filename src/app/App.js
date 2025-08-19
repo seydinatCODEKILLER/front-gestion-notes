@@ -12,12 +12,13 @@ import { hydrateStoreFromLocalStorage } from "@/utils/HydrateStore";
 import { DashboardService } from "@/features/admin/dashboard/DashboardService";
 import { DashboardController } from "@/features/admin/dashboard/DashboardController";
 import { AdminLayout } from "@/layout/AdminLayout";
-import { dashbaordRoutes } from "@/features/admin/dashboard/DashboardRoute";
+import { adminRoutes } from "@/routes/DashboardRoute";
 import { TrimestreService } from "@/features/admin/trimestre/TrimestreService";
 import { AnneeScolaireService } from "@/features/admin/annee_scolaire/AnneeScolaireService";
 import { ErrorLayout } from "@/layout/ErrorLayout";
 import { errorRoutes } from "@/features/error/ErrorRoute";
-
+import { NiveauService } from "@/features/admin/niveaux/NiveauService";
+import { NiveauController } from "@/features/admin/niveaux/NiveauController";
 
 export class App {
   constructor(config) {
@@ -35,24 +36,25 @@ export class App {
     this.services.trimestres = new TrimestreService(this);
     this.services.annee_scolaire = new AnneeScolaireService(this);
     this.services.dashboard = new DashboardService(this);
+    this.services.niveaux = new NiveauService(this);
 
     this.controllers = {
       auth: new AuthController(this),
-      dashboard: new DashboardController(this)
+      dashboard: new DashboardController(this),
+      niveaux: new NiveauController(this),
     };
 
     this.router = new Router(this, {
       mode: "history",
     });
 
-    this.router.addLayout("auth", AuthLayout)
-    this.router.addLayout("admin", AdminLayout)
-    this.router.addLayout("error", ErrorLayout)
+    this.router.addLayout("auth", AuthLayout);
+    this.router.addLayout("admin", AdminLayout);
+    this.router.addLayout("error", ErrorLayout);
 
     this.router.addRoutes(authRoutes);
-    this.router.addRoutes(dashbaordRoutes);
-    this.router.addRoutes(errorRoutes)
-
+    this.router.addRoutes(adminRoutes);
+    this.router.addRoutes(errorRoutes);
 
     this.initModules();
     hydrateStoreFromLocalStorage(this.store, this.services.storage);

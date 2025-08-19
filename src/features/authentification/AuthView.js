@@ -23,7 +23,7 @@ export class AuthView extends AbstractView {
     return `
       <div class="absolute top-2 left-5 flex items-center gap-2">
         <i class="ri-nft-fill text-purple-500 text-xl"></i>
-        <p class="text-gray-800 font-medium">E-Boutique</p>
+        <p class="text-gray-800 font-medium">E-Gestion Note</p>
       </div>
         <form id="loginForm" class="w-full md:w-[340px] lg:w-[400px] p-3 mt-4">
         <p class="text-gray-600 text-sm font-medium w-full md:w-96 mb-5">

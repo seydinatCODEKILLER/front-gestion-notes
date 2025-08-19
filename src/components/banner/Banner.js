@@ -47,7 +47,7 @@ export class Banner {
 
   render() {
     const banner = document.createElement("div");
-    banner.className = `w-full rounded-lg p-6 shadow-sm transition-all duration-300 ${
+    banner.className = `w-full rounded-lg p-6 shadow-sm transition-all duration-300 mt-3 ${
       this.variantClasses[this.variant]
     }`;
 

@@ -112,6 +112,15 @@ export default class ApiService {
     });
   }
 
+  async put(endpoint, data, { formData = false, ...config } = {}) {
+    return this.request(endpoint, {
+      method: "PUT",
+      data,
+      formData,
+      ...config,
+    });
+  }
+
   async delete(endpoint, config = {}) {
     return this.request(endpoint, {
       method: "DELETE",

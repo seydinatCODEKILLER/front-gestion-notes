@@ -53,29 +53,25 @@ export class DashboardService extends AbstractService {
   }
 
   async fetchClassStats() {
-    const response = await this.request("GET", "/api/classes/stats");
+    const response = await this.get("/api/classes/stats");
     return this.validateStats(response.data);
   }
 
   async fetchProfessorStats() {
-    const response = await this.request("GET", "/api/teachers/stats");
+    const response = await this.get("/api/teachers/stats");
     return this.validateStats(response.data);
   }
 
   async fetchStudentStats() {
-    const response = await this.request("GET", "/api/students/stats");
+    const response = await this.get("/api/students/stats");
     return this.validateStats(response.data);
   }
 
   async fetchAdminDashboardStats(trimestreId, anneeScolaireId) {
-    const response = await this.request(
-      "GET",
-      "/api/statistic/global",
-      {},
-      {
-        params: { trimestreId: trimestreId, anneeScolaireId: anneeScolaireId },
-      }
-    );
+    const response = await this.get("/api/statistic/global", {
+      trimestreId: trimestreId,
+      anneeScolaireId: anneeScolaireId,
+    });
     return response.data;
   }
 

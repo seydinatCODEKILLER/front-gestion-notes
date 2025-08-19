@@ -59,7 +59,7 @@ export class AdminLayout {
     this.sidebarInstance = new Sidebar({
       logo: {
         icon: "ri-nft-fill text-purple-500 text-xl",
-        text: "E-Boutique",
+        text: "E-Gestion Note",
       },
       user: {
         avatar: avatar || "",
@@ -68,7 +68,7 @@ export class AdminLayout {
       },
       links: this.#getSidebarLinks(),
       onNavigate: (path) => this.app.router.navigateTo(path),
-      onLogout: () => this.app.getController("Auth").logout(),
+      onLogout: () => this.app.getController("auth").logout(),
     });
 
     this.sidebarInstance.render(
@@ -84,9 +84,9 @@ export class AdminLayout {
         path: "/admin/dashboard",
       },
       {
-        text: "Boutiquiers",
-        icon: "ri-user-3-line",
-        path: "/admin/boutiquiers",
+        text: "Gestion Niveaux",
+        icon: "ri-stack-line",
+        path: "/admin/niveaux",
       },
     ];
   }

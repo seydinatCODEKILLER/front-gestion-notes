@@ -35,18 +35,90 @@ export class AbstractService {
         }
       }
 
-      const requestOptions = ["GET", "HEAD"].includes(method.toUpperCase())
-        ? { method, headers, ...options }
-        : { method, headers, data, ...options };
+      // Utilisation des méthodes spécifiques de l'ApiService selon la méthode HTTP
+      let response;
+      const methodUpper = method.toUpperCase();
+      
+      switch (methodUpper) {
+        case "GET":
+          response = await this.api.get(finalUrl, options.params || {}, { 
+            headers, 
+            signal: options.signal,
+            ...options 
+          });
+          break;
+          
+        case "POST":
+          response = await this.api.post(finalUrl, data, { 
+            headers, 
+            formData: options.formData,
+            signal: options.signal,
+            ...options 
+          });
+          break;
+          
+        case "PUT":
+          response = await this.api.put(finalUrl, data, { 
+            headers, 
+            formData: options.formData,
+            signal: options.signal,
+            ...options 
+          });
+          break;
+          
+        case "PATCH":
+          response = await this.api.patch(finalUrl, data, { 
+            headers, 
+            formData: options.formData,
+            signal: options.signal,
+            ...options 
+          });
+          break;
+          
+        case "DELETE":
+          response = await this.api.delete(finalUrl, { 
+            headers, 
+            signal: options.signal,
+            ...options 
+          });
+          break;
+          
+        default:
+          // Fallback pour les autres méthodes HTTP
+          const requestOptions = ["GET", "HEAD"].includes(methodUpper)
+            ? { method, headers, ...options }
+            : { method, headers, data, ...options };
+          
+          delete requestOptions.params;
+          response = await this.api.request(finalUrl, requestOptions);
+      }
 
-      // Supprimer params pour éviter la duplication dans ApiService
-      delete requestOptions.params;
-
-      return await this.api.request(finalUrl, requestOptions);
+      return response;
     } catch (error) {
       this.handleApiError(error);
       throw error;
     }
+  }
+
+  // Méthodes utilitaires pour un usage plus simple
+  async get(endpoint, params = {}, options = {}) {
+    return this.request("GET", endpoint, {}, { ...options, params });
+  }
+
+  async post(endpoint, data = {}, options = {}) {
+    return this.request("POST", endpoint, data, options);
+  }
+
+  async put(endpoint, data = {}, options = {}) {
+    return this.request("PUT", endpoint, data, options);
+  }
+
+  async patch(endpoint, data = {}, options = {}) {
+    return this.request("PATCH", endpoint, data, options);
+  }
+
+  async delete(endpoint, options = {}) {
+    return this.request("DELETE", endpoint, {}, options);
   }
 
   handleApiError(error) {
