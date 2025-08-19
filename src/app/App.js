@@ -9,6 +9,12 @@ import { Router } from "@app/core/router/Router.js";
 import { authRoutes } from "@features/authentification/AuthRoute.js";
 import { AuthLayout } from "@layout/AuthLayout.js";
 import { hydrateStoreFromLocalStorage } from "@/utils/HydrateStore";
+import { DashboardService } from "@/features/admin/dashboard/DashboardService";
+import { DashboardController } from "@/features/admin/dashboard/DashboardController";
+import { AdminLayout } from "@/layout/AdminLayout";
+import { dashbaordRoutes } from "@/features/admin/dashboard/DashboardRoute";
+import { TrimestreService } from "@/features/admin/trimestre/TrimestreService";
+import { AnneeScolaireService } from "@/features/admin/annee_scolaire/AnneeScolaireService";
 
 
 export class App {
@@ -23,10 +29,14 @@ export class App {
     };
 
     this.services.notifications = new NotificationService(this);
-    this.services.auth = new AuthService(this)
+    this.services.auth = new AuthService(this);
+    this.services.trimestres = new TrimestreService(this);
+    this.services.annee_scolaire = new AnneeScolaireService(this);
+    this.services.dashboard = new DashboardService(this);
 
     this.controllers = {
-      auth : new AuthController(this)
+      auth: new AuthController(this),
+      dashboard: new DashboardController(this)
     };
 
     this.router = new Router(this, {
@@ -34,8 +44,10 @@ export class App {
     });
 
     this.router.addLayout("auth", AuthLayout)
+    this.router.addLayout("admin", AdminLayout)
 
-    this.router.addRoutes(authRoutes)
+    this.router.addRoutes(authRoutes);
+    this.router.addRoutes(dashbaordRoutes)
 
 
     this.initModules();

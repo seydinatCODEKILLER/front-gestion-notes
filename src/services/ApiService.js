@@ -24,7 +24,7 @@ export default class ApiService {
 
   async request(
     endpoint,
-    { method = "GET", data = null, formData = false, signal } = {}
+    { method = "GET", data = null, formData = false, signal, headers = {} } = {}
   ) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -32,19 +32,19 @@ export default class ApiService {
 
     try {
       const url = new URL(endpoint, this.baseURL);
-      console.log(url);
       const options = {
         method,
-        headers: { ...this.defaultHeaders },
+        headers: { ...this.defaultHeaders, ...headers }, // Conserve les headers existants
         signal: finalSignal,
       };
 
-      // Pre-request hook
+      // Pre-request hook modifié pour conserver les headers
       const processedRequest = await this.hooks.preRequest({
         url,
         options,
         data,
         formData,
+        headers: options.headers, // Passe les headers au hook
       });
 
       if (processedRequest.data) {
@@ -65,17 +65,16 @@ export default class ApiService {
       );
       clearTimeout(timeoutId);
 
+      if (response.status === 401) {
+        const authService = this.app?.getService("auth");
+        if (authService) authService.logout();
+      }
+
       if (!response.ok) {
         throw new ApiError(response.status, await this.#parseError(response));
       }
 
-      const parsedResponse = await this.#parseResponse(response);
-
-      // Post-response hook
-      return this.hooks.postResponse(parsedResponse, {
-        request: processedRequest,
-        response,
-      });
+      return await this.#parseResponse(response);
     } catch (error) {
       clearTimeout(timeoutId);
       const normalizedError = this.#normalizeError(error);
@@ -159,7 +158,7 @@ export default class ApiService {
   async #parseError(response) {
     try {
       const data = await this.#parseResponse(response);
-      console.log(data)
+      console.log(data);
       return {
         message: data || `HTTP error ${response.status}`,
         ...data,

@@ -7,6 +7,8 @@ export class AuthController {
   async login(credentials) {
     try {
       const user = await this.service.login(credentials);
+      console.log(user);
+      // return;
 
       this.app.store.setState({
         user,
@@ -19,7 +21,7 @@ export class AuthController {
         "success"
       );
 
-    //   this.redirectAfterLogin(user.role);
+      this.redirectAfterLogin(user.role);
       console.log(user);
     } catch (error) {
       this.handleAuthError(error);

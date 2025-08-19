@@ -1,5 +1,6 @@
-import { ResponsiveHeader } from "../components/header/Header.js";
-import Sidebar from "../components/sidebar/Sidebar.js";
+import { ResponsiveHeader } from "@/components/header/Header";
+import Sidebar from "@/components/sidebar/Sidebar";
+
 
 export class AdminLayout {
   constructor(app) {
@@ -37,6 +38,8 @@ export class AdminLayout {
 
   #setupHeader() {
     const { nom, prenom } = this.app.store.state.user;
+    console.log(this.app.store.state.user);
+    
 
     this.headerInstance = new ResponsiveHeader({
       currentPage: "Admin",
