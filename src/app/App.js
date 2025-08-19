@@ -19,6 +19,7 @@ import { ErrorLayout } from "@/layout/ErrorLayout";
 import { errorRoutes } from "@/features/error/ErrorRoute";
 import { NiveauService } from "@/features/admin/niveaux/NiveauService";
 import { NiveauController } from "@/features/admin/niveaux/NiveauController";
+import { AnneeScolaireController } from "@/features/admin/annee_scolaire/AnneeScolaireController";
 
 export class App {
   constructor(config) {
@@ -42,6 +43,7 @@ export class App {
       auth: new AuthController(this),
       dashboard: new DashboardController(this),
       niveaux: new NiveauController(this),
+      annee_scolaire: new AnneeScolaireController(this),
     };
 
     this.router = new Router(this, {

@@ -9,6 +9,8 @@ export const validators = {
 
   minValue: (value, min) => parseFloat(value) >= min,
   maxValue: (value, max) => parseFloat(value) <= max,
+  maxLength: (value, max) => value?.length <= max,
+
   isInteger: (value) => Number.isInteger(parseFloat(value)),
   isPositive: (value) => parseFloat(value) >= 0,
   validUrl: (value) => {
@@ -32,7 +34,7 @@ export const validators = {
     if (!value) return true;
     return await checkUniqueFn(value);
   },
-    isUnique: async (value, checkFn,field) => {
+  isUnique: async (value, checkFn, field) => {
     if (!value) return true;
     try {
       const exists = await checkFn(value);
@@ -41,5 +43,5 @@ export const validators = {
       console.error("Erreur lors de la vérification d’unicité :", error);
       return "Erreur de vérification";
     }
-  }
+  },
 };

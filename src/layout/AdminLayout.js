@@ -88,6 +88,11 @@ export class AdminLayout {
         icon: "ri-stack-line",
         path: "/admin/niveaux",
       },
+      {
+        text: "Gestion Annees",
+        icon: "ri-attachment-line",
+        path: "/admin/annees",
+      },
     ];
   }
 

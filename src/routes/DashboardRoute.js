@@ -2,6 +2,7 @@ import { AuthGuard } from "@/app/guard/AuthGuard";
 import { AdminGuard } from "@/app/guard/RoleGuard";
 import { DashboardView } from "@features/admin/dashboard/DashboardView";
 import { AdminNiveauView } from "../features/admin/niveaux/NiveauView.js";
+import { AdminAnneeScolaireView } from "@/features/admin/annee_scolaire/AdminAnneeScolaireView.js";
 
 export const adminRoutes = [
   {
@@ -21,6 +22,16 @@ export const adminRoutes = [
       layout: "admin",
       requiresAuth: true,
       title: "Niveaux",
+    },
+    guards: [AuthGuard, AdminGuard],
+  },
+  {
+    path: "/admin/annees",
+    component: AdminAnneeScolaireView,
+    meta: {
+      layout: "admin",
+      requiresAuth: true,
+      title: "Annees scolaire",
     },
     guards: [AuthGuard, AdminGuard],
   },
