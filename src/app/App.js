@@ -15,6 +15,8 @@ import { AdminLayout } from "@/layout/AdminLayout";
 import { dashbaordRoutes } from "@/features/admin/dashboard/DashboardRoute";
 import { TrimestreService } from "@/features/admin/trimestre/TrimestreService";
 import { AnneeScolaireService } from "@/features/admin/annee_scolaire/AnneeScolaireService";
+import { ErrorLayout } from "@/layout/ErrorLayout";
+import { errorRoutes } from "@/features/error/ErrorRoute";
 
 
 export class App {
@@ -45,9 +47,11 @@ export class App {
 
     this.router.addLayout("auth", AuthLayout)
     this.router.addLayout("admin", AdminLayout)
+    this.router.addLayout("error", ErrorLayout)
 
     this.router.addRoutes(authRoutes);
-    this.router.addRoutes(dashbaordRoutes)
+    this.router.addRoutes(dashbaordRoutes);
+    this.router.addRoutes(errorRoutes)
 
 
     this.initModules();

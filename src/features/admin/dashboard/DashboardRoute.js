@@ -1,3 +1,5 @@
+import { AuthGuard } from "@/app/guard/AuthGuard";
+import { AdminGuard } from "@/app/guard/RoleGuard";
 import { DashboardView } from "@features/admin/dashboard/DashboardView";
 
 export const dashbaordRoutes = [
@@ -9,5 +11,6 @@ export const dashbaordRoutes = [
       requiresAuth: true,
       title: "Dashboard",
     },
+    guards: [AuthGuard, AdminGuard]
   },
 ];
