@@ -3,29 +3,53 @@ import { AbstractService } from "@/app/abstract/AbstractService";
 export class TrimestreService extends AbstractService {
   constructor(app) {
     super(app);
-    this.cacheDuration = 300000; // 5 minutes de cache
-    this.currentTrimestreCache = null;
-    this.lastFetch = null;
+  }
+
+  async getAllTrimestres() {
+    const response = await this.get("/api/trimestres");
+    return response.data;
   }
 
   async getCurrent() {
-    if (this.shouldUseCache()) {
-      return this.currentTrimestreCache;
-    }
-
-    try {
-      const response = await this.request("GET", "/api/trimestres/current");
-      this.currentTrimestreCache = response.data;
-      console.log(this.currentTrimestreCache);
-
-      this.lastFetch = Date.now();
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.get("/api/trimestres/current");
+    return response.data;
   }
 
-  shouldUseCache() {
-    return this.lastFetch && Date.now() - this.lastFetch < this.cacheDuration;
+  async getTrimestre(id) {
+    const response = await this.get(`/api/trimestres/${id}`);
+    return response.data;
+  }
+
+  async createTrimestre(data) {
+    const response = await this.post("/api/trimestres", data);
+    return response.data;
+  }
+
+  async updateTrimestre(id, data) {
+    const response = await this.put(`/api/trimestres/${id}`, data);
+    return response.data;
+  }
+
+  async softDeleteTrimestre(id) {
+    const response = await this.patch(`/api/trimestres/${id}/delete`);
+    return response.data;
+  }
+
+  async restoreTrimestre(id) {
+    const response = await this.patch(`/api/trimestres/${id}/restore`);
+    return response.data;
+  }
+
+  async libelleExists(libelle, anneeScolaireId) {
+    try {
+      const trimestres = await this.getAllTrimestres();
+      return trimestres.some(t => 
+        t.libelle.toLowerCase() === libelle.toLowerCase() && 
+        t.anneeScolaireId === anneeScolaireId
+      );
+    } catch (error) {
+      console.error("Erreur lors de la vérification du libellé:", error);
+      return false;
+    }
   }
 }

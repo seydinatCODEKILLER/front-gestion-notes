@@ -30,10 +30,6 @@ export const validators = {
     if (!value) return true;
     return /^(77|78|70|76)[0-9]{7}$/.test(value);
   },
-  isUnique: async (value, checkUniqueFn) => {
-    if (!value) return true;
-    return await checkUniqueFn(value);
-  },
   isUnique: async (value, checkFn, field) => {
     if (!value) return true;
     try {

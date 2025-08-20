@@ -20,6 +20,7 @@ import { errorRoutes } from "@/features/error/ErrorRoute";
 import { NiveauService } from "@/features/admin/niveaux/NiveauService";
 import { NiveauController } from "@/features/admin/niveaux/NiveauController";
 import { AnneeScolaireController } from "@/features/admin/annee_scolaire/AnneeScolaireController";
+import { TrimestreController } from "@/features/admin/trimestre/TrimestreController";
 
 export class App {
   constructor(config) {
@@ -34,8 +35,8 @@ export class App {
 
     this.services.notifications = new NotificationService(this);
     this.services.auth = new AuthService(this);
-    this.services.trimestres = new TrimestreService(this);
     this.services.annee_scolaire = new AnneeScolaireService(this);
+    this.services.trimestres = new TrimestreService(this);
     this.services.dashboard = new DashboardService(this);
     this.services.niveaux = new NiveauService(this);
 
@@ -44,6 +45,7 @@ export class App {
       dashboard: new DashboardController(this),
       niveaux: new NiveauController(this),
       annee_scolaire: new AnneeScolaireController(this),
+      trimestres: new TrimestreController(this)
     };
 
     this.router = new Router(this, {

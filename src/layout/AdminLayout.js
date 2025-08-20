@@ -93,6 +93,11 @@ export class AdminLayout {
         icon: "ri-attachment-line",
         path: "/admin/annees",
       },
+      {
+        text: "Gestion Trimestres",
+        icon: "ri-bubble-chart-line",
+        path: "/admin/trimestres",
+      },
     ];
   }
 
