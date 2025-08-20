@@ -103,6 +103,11 @@ export class AdminLayout {
         icon: "ri-brush-ai-line",
         path: "/admin/classes",
       },
+      {
+        text: "Gestion professeurs",
+        icon: "ri-brush-ai-line",
+        path: "/admin/professeurs",
+      },
     ];
   }
 

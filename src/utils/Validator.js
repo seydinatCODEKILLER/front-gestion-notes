@@ -40,4 +40,10 @@ export const validators = {
       return "Erreur de vérification";
     }
   },
+  date: (value) => {
+  if (!value) return false;
+  const d = new Date(value);
+  return !isNaN(d.getTime());
+},
+
 };

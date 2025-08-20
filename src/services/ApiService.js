@@ -49,15 +49,22 @@ export default class ApiService {
 
       if (processedRequest.data) {
         if (processedRequest.formData) {
-          processedRequest.options.body = this.#createFormData(
-            processedRequest.data
-          );
+          if (processedRequest.data instanceof FormData) {
+            // Déjà un FormData, on le passe direct
+            processedRequest.options.body = processedRequest.data;
+          } else {
+            // Sinon on le construit
+            processedRequest.options.body = this.#createFormData(
+              processedRequest.data
+            );
+          }
           delete processedRequest.options.headers["Content-Type"];
         } else {
           processedRequest.options.headers["Content-Type"] = "application/json";
           processedRequest.options.body = JSON.stringify(processedRequest.data);
         }
       }
+
 
       const response = await fetch(
         processedRequest.url.toString(),

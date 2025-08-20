@@ -5,6 +5,7 @@ import { AdminNiveauView } from "../features/admin/niveaux/NiveauView.js";
 import { AdminAnneeScolaireView } from "@/features/admin/annee_scolaire/AdminAnneeScolaireView.js";
 import { AdminTrimestreView } from "@/features/admin/trimestre/AdminTrimestreView.js";
 import { AdminClassView } from "@/features/admin/classe/AdminClassView.js";
+import { AdminTeacherView } from "@/features/admin/professeur/AdminTeacherView.js";
 
 export const adminRoutes = [
   {
@@ -54,6 +55,16 @@ export const adminRoutes = [
       layout: "admin",
       requiresAuth: true,
       title: "Admin | Classes",
+    },
+    guards: [AuthGuard, AdminGuard],
+  },
+  {
+    path: "/admin/professeurs",
+    component: AdminTeacherView,
+    meta: {
+      layout: "admin",
+      requiresAuth: true,
+      title: "Admin | Professeurs",
     },
     guards: [AuthGuard, AdminGuard],
   },
