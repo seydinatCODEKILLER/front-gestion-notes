@@ -104,9 +104,14 @@ export class AdminLayout {
         path: "/admin/classes",
       },
       {
-        text: "Gestion professeurs",
-        icon: "ri-brush-ai-line",
+        text: "Mes Professeurs",
+        icon: "ri-shadow-line",
         path: "/admin/professeurs",
+      },
+      {
+        text: "Mes Etudiants",
+        icon: "ri-shapes-line",
+        path: "/admin/etudiants",
       },
     ];
   }

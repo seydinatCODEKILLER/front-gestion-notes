@@ -6,6 +6,7 @@ import { AdminAnneeScolaireView } from "@/features/admin/annee_scolaire/AdminAnn
 import { AdminTrimestreView } from "@/features/admin/trimestre/AdminTrimestreView.js";
 import { AdminClassView } from "@/features/admin/classe/AdminClassView.js";
 import { AdminTeacherView } from "@/features/admin/professeur/AdminTeacherView.js";
+import { AdminStudentView } from "@/features/admin/etudiant/AdminStudentView.js";
 
 export const adminRoutes = [
   {
@@ -65,6 +66,16 @@ export const adminRoutes = [
       layout: "admin",
       requiresAuth: true,
       title: "Admin | Professeurs",
+    },
+    guards: [AuthGuard, AdminGuard],
+  },
+  {
+    path: "/admin/etudiants",
+    component: AdminStudentView,
+    meta: {
+      layout: "admin",
+      requiresAuth: true,
+      title: "Admin | Etudiants",
     },
     guards: [AuthGuard, AdminGuard],
   },

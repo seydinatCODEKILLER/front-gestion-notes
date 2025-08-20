@@ -25,6 +25,8 @@ import { ClassService } from "@/features/admin/classe/ClassService";
 import { ClassController } from "@/features/admin/classe/ClassController";
 import { TeacherController } from "@/features/admin/professeur/TeacherController";
 import { TeacherService } from "@/features/admin/professeur/TeacherService";
+import { StudentService } from "@/features/admin/etudiant/StudentService";
+import { StudentController } from "@/features/admin/etudiant/StudentController";
 
 export class App {
   constructor(config) {
@@ -44,7 +46,8 @@ export class App {
     this.services.dashboard = new DashboardService(this);
     this.services.niveaux = new NiveauService(this);
     this.services.classes = new ClassService(this);
-    this.services.teachers = new TeacherService(this)
+    this.services.teachers = new TeacherService(this);
+    this.services.students = new StudentService(this);
 
     this.controllers = {
       auth: new AuthController(this),
@@ -53,7 +56,8 @@ export class App {
       annee_scolaire: new AnneeScolaireController(this),
       trimestres: new TrimestreController(this),
       classes: new ClassController(this),
-      teachers: new TeacherController(this)
+      teachers: new TeacherController(this),
+      students: new StudentController(this)
     };
 
     this.router = new Router(this, {

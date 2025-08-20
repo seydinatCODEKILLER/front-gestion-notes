@@ -1,0 +1,501 @@
+import { Modal } from "@/components/modal/Modal";
+import { validators } from "@/utils/Validator";
+
+export class AbstractStudentModal {
+  constructor(app, config = {}) {
+    this.app = app;
+    this.controller = app.getController("students");
+    this.service = app.getService("students");
+    this.config = config;
+    this.isInitialized = false;
+    this.classes = [];
+    this.initPromise = this.init();
+  }
+
+  async init() {
+    await this.loadClasses();
+    this.createForm();
+    this.setupModal();
+    this.setupValidation();
+    this.setupEvents();
+    this.initForm();
+    this.isInitialized = true;
+  }
+
+  async loadClasses() {
+    try {
+      this.classes = await this.controller.getClasses();
+    } catch (error) {
+      console.error("Erreur lors du chargement des classes:", error);
+      this.classes = [];
+    }
+  }
+
+  createForm() {
+    this.form = document.createElement("form");
+    this.form.className = "space-y-4";
+    this.form.noValidate = true;
+    this.form.innerHTML = this.getFormTemplate();
+  }
+
+  getFormTemplate() {
+    return `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Nom -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Nom <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="text" name="nom" class="input input-bordered input-primary" required maxlength="100">
+          <div data-error="nom" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Prénom -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Prénom <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="text" name="prenom" class="input input-bordered input-primary" required maxlength="100">
+          <div data-error="prenom" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Email <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="email" name="email" class="input input-bordered input-primary" required>
+          <div data-error="email" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Téléphone -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Téléphone <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="tel" name="telephone" class="input input-bordered input-primary" required>
+          <div data-error="telephone" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Date de naissance -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Date de naissance <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="date" name="date_naissance" class="input input-bordered input-primary" required>
+          <div data-error="date_naissance" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Lieu de naissance -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Lieu de naissance <span class="text-error">*</span>
+            </span>
+          </label>
+          <input type="text" name="lieu_naissance" class="input input-bordered input-primary" required maxlength="100">
+          <div data-error="lieu_naissance" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Classe -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Classe</span>
+          </label>
+          <select name="classId" class="select select-bordered select-primary">
+            <option value="">Sélectionner une classe</option>
+            ${this.classes.map(c => `<option value="${c.id}">${c.nom}</option>`).join('')}
+          </select>
+          <div data-error="classId" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-2">
+              Mot de passe ${
+                this.config.requirePassword
+                  ? '<span class="text-error">*</span>'
+                  : ""
+              }
+            </span>
+          </label>
+          <div class="relative">
+            <input type="password" name="password" class="input input-bordered input-primary w-full" 
+                   ${
+                     this.config.requirePassword ? 'required minlength="6"' : ""
+                   }>
+            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 toggle-password">
+              <i class="ri-eye-line"></i>
+            </button>
+          </div>
+          <div data-error="password" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Adresse -->
+        <div class="form-control md:col-span-2 flex flex-col">
+          <label class="label">
+            <span class="label-text">Adresse</span>
+          </label>
+          <textarea name="adresse" class="textarea textarea-bordered textarea-primary" rows="3"></textarea>
+          <div data-error="adresse" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="form-control md:col-span-2">
+          <label class="label">
+            <span class="label-text">Photo de profil</span>
+          </label>
+          <div class="flex items-center gap-4">
+            <div class="avatar-preview w-16 h-16 rounded-full bg-gray-200 overflow-hidden hidden">
+              <img id="avatar-preview" class="w-full h-full object-cover" src="" alt="Preview">
+            </div>
+            <label class="btn btn-outline btn-primary cursor-pointer">
+              <i class="ri-upload-line mr-2"></i>
+              Choisir une image
+              <input type="file" accept="image/*" name="avatar" class="hidden" id="avatar-upload">
+            </label>
+          </div>
+          <div data-error="avatar" class="text-error text-sm mt-1 hidden"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  setupModal() {
+    this.modal = new Modal({
+      title: this.config.title || "Étudiant",
+      content: this.form,
+      size: "xl",
+      footerButtons: this.getFooterButtons(),
+    });
+  }
+
+  getFooterButtons() {
+    return [
+      {
+        text: "Annuler",
+        className: "btn-ghost",
+        action: "cancel",
+        onClick: () => this.close(),
+      },
+      {
+        text: this.getSubmitButtonText(),
+        className: "btn-primary",
+        action: "submit",
+        onClick: (e) => this.handleSubmit(e),
+        closeOnClick: false,
+      },
+    ];
+  }
+
+  getSubmitButtonText() {
+    return "Valider";
+  }
+
+  initForm() {
+    // À implémenter dans les classes enfants
+  }
+
+  setupEvents() {
+    this.form.addEventListener("submit", (e) => this.handleSubmit(e));
+
+    // Toggle password visibility
+    this.form
+      .querySelector(".toggle-password")
+      ?.addEventListener("click", (e) => {
+        const passwordInput = this.form.querySelector('[name="password"]');
+        const icon = e.currentTarget.querySelector("i");
+        const isPassword = passwordInput.type === "password";
+
+        passwordInput.type = isPassword ? "text" : "password";
+        icon.className = isPassword ? "ri-eye-off-line" : "ri-eye-line";
+      });
+
+    // Avatar preview
+    this.form
+      .querySelector("#avatar-upload")
+      ?.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const preview = this.form.querySelector("#avatar-preview");
+            const previewContainer = this.form.querySelector(".avatar-preview");
+
+            preview.src = event.target.result;
+            previewContainer.classList.remove("hidden");
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+    this.form.querySelectorAll("input, textarea, select").forEach((input) => {
+      input.addEventListener("blur", () => this.validateField(input.name));
+      input.addEventListener("input", () => {
+        if (this.fields[input.name]?.error) {
+          this.clearError(input.name);
+        }
+      });
+    });
+  }
+
+  setupValidation() {
+    this.fields = {
+      nom: {
+        value: "",
+        error: "",
+        validator: (v) => validators.required(v) || "Le nom est requis",
+      },
+      prenom: {
+        value: "",
+        error: "",
+        validator: (v) => validators.required(v) || "Le prénom est requis",
+      },
+      date_naissance: {
+        value: "",
+        error: "",
+        validator: (v) => {
+          if (!validators.required(v)) return "La date de naissance est requise";
+          if (!validators.date(v)) return "Date invalide";
+          return true;
+        },
+      },
+      lieu_naissance: {
+        value: "",
+        error: "",
+        validator: (v) => validators.required(v) || "Le lieu de naissance est requis",
+      },
+      email: {
+        value: "",
+        error: "",
+        validator: async (v) => {
+          if (!validators.required(v)) return "L'email est requis";
+          if (!validators.email(v)) return "Format email invalide";
+
+          const currentEmail = this.config?.student?.user?.email || null;
+          if (currentEmail && currentEmail.toLowerCase() === v.toLowerCase()) {
+            return true;
+          }
+
+          return await validators.isUnique(
+            v,
+            this.service.emailExists.bind(this.service),
+            "email"
+          );
+        },
+      },
+      telephone: {
+        value: "",
+        error: "",
+        validator: async (v) => {
+          if (!validators.required(v)) return "Le téléphone est requis";
+          if (!validators.senegalPhone(v))
+            return "Format de téléphone invalide";
+
+          const currentPhone = this.config?.student?.user?.telephone || null;
+          if (currentPhone === v) {
+            return true;
+          }
+
+          return await validators.isUnique(
+            v,
+            this.service.phoneExists.bind(this.service),
+            "telephone"
+          );
+        },
+      },
+      classId: {
+        value: "",
+        error: "",
+        validator: (v) => true, // Optionnel
+      },
+      adresse: {
+        value: "",
+        error: "",
+        validator: () => true,
+      },
+      password: {
+        value: "",
+        error: "",
+        validator: (v) => {
+          if (!this.config.requirePassword) return true;
+          if (!validators.required(v)) return "Le mot de passe est requis";
+          if (!validators.passwordComplexity(v)) return "Le format du mot de passe est incorrect";
+          if (!validators.minLength(v, 6)) return "Minimum 6 caractères";
+          return true;
+        },
+      },
+      avatar: {
+        value: "",
+        error: "",
+        validator: (v) => {
+          if (!v) return true;
+          return (
+            validators.fileType(v, ["image/jpeg", "image/png", "image/gif"]) ||
+            "Seuls les JPG, PNG et GIF sont acceptés"
+          );
+        },
+      },
+    };
+  }
+
+  async handleSubmit(e) {
+    e.preventDefault();
+
+    if (!(await this.validateForm())) {
+      return;
+    }
+
+    this.modal.setButtonLoading("submit", true, this.getLoadingText());
+
+    try {
+      const formData = this.getFormData();
+      await this.processFormData(formData);
+      this.close();
+    } catch (error) {
+      this.handleSubmitError(error);
+    } finally {
+      this.modal.setButtonLoading("submit", false);
+    }
+  }
+
+  getLoadingText() {
+    return "Enregistrement...";
+  }
+
+  getFormData() {
+    const formData = new FormData(this.form);
+
+    // Ajouter tous les champs textuels
+    formData.append("nom", this.form.querySelector('[name="nom"]').value);
+    formData.append("prenom", this.form.querySelector('[name="prenom"]').value);
+    formData.append("email", this.form.querySelector('[name="email"]').value);
+    formData.append("date_naissance", this.form.querySelector('[name="date_naissance"]').value);
+    formData.append("lieu_naissance", this.form.querySelector('[name="lieu_naissance"]').value);
+    formData.append(
+      "telephone",
+      this.form.querySelector('[name="telephone"]').value
+    );
+    formData.append(
+      "adresse",
+      this.form.querySelector('[name="adresse"]').value
+    );
+
+    // Ajouter la classe si sélectionnée
+    const classId = this.form.querySelector('[name="classId"]').value;
+    if (classId) {
+      formData.append("classId", classId);
+    }
+
+    // Ajouter le mot de passe seulement s'il est requis et non vide
+    const password = this.form.querySelector('[name="password"]').value;
+    if (password && this.config.requirePassword) {
+      formData.set("password", password);
+    } else {
+      formData.delete("password"); // éviter d'envoyer un champ vide
+    }
+
+    // Ajouter le fichier avatar s'il est sélectionné
+    const avatarFile = this.form.querySelector('[name="avatar"]').files[0];
+    if (avatarFile) {
+      formData.set("avatar", avatarFile);
+    } else {
+      formData.delete("avatar");
+    }
+
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    return formData;
+  }
+
+  async processFormData(formData) {
+    throw new Error("Method 'processFormData' must be implemented");
+  }
+
+  handleSubmitError(error) {
+    console.error("Erreur formulaire:", error);
+    this.app.services.notifications.show(
+      error.message || "Une erreur est survenue",
+      "error"
+    );
+  }
+
+  async validateForm() {
+    let isValid = true;
+
+    for (const field of Object.keys(this.fields)) {
+      await this.validateField(field);
+      if (this.fields[field].error) isValid = false;
+    }
+
+    return isValid;
+  }
+
+  async validateField(name) {
+    if (!this.fields[name]) return;
+
+    const input = this.form.querySelector(`[name="${name}"]`);
+    if (!input) return;
+
+    const value = input.type === "file" ? input.files[0] : input.value;
+    this.fields[name].value = value;
+
+    const result = await this.fields[name].validator(value);
+    this.fields[name].error = typeof result === "string" ? result : "";
+
+    this.displayError(name);
+  }
+
+  displayError(name, customError = null) {
+    const error = customError || this.fields[name]?.error;
+    const errorElement = this.form.querySelector(`[data-error="${name}"]`);
+    const input = this.form.querySelector(`[name="${name}"]`);
+
+    if (errorElement) {
+      errorElement.textContent = error || "";
+      errorElement.classList.toggle("hidden", !error);
+    }
+
+    if (input) {
+      input.classList.toggle("input-error", !!error);
+    }
+  }
+
+  clearError(name) {
+    this.displayError(name, "");
+  }
+
+  async open() {
+    if (!this.isInitialized) {
+      await this.initPromise;
+    }
+
+    this.form.reset();
+    const preview = this.form.querySelector("#avatar-preview");
+    const previewContainer = this.form.querySelector(".avatar-preview");
+    if (preview && previewContainer) {
+      preview.src = "";
+      previewContainer.classList.add("hidden");
+    }
+    Object.keys(this.fields).forEach((field) => this.clearError(field));
+    this.initForm();
+    this.modal.open();
+  }
+
+  close() {
+    this.modal.close();
+  }
+}

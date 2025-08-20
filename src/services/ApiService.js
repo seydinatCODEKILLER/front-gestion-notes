@@ -10,7 +10,7 @@ export default class ApiService {
       Accept: "application/json",
       ...config.headers,
     };
-    this.timeout = config.timeout || 8000;
+    this.timeout = config.timeout || 20000;
     this.hooks = {
       preRequest: config.preRequest || ((req) => req),
       postResponse: config.postResponse || ((res) => res),
