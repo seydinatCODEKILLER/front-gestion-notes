@@ -21,6 +21,8 @@ import { NiveauService } from "@/features/admin/niveaux/NiveauService";
 import { NiveauController } from "@/features/admin/niveaux/NiveauController";
 import { AnneeScolaireController } from "@/features/admin/annee_scolaire/AnneeScolaireController";
 import { TrimestreController } from "@/features/admin/trimestre/TrimestreController";
+import { ClassService } from "@/features/admin/classe/ClassService";
+import { ClassController } from "@/features/admin/classe/ClassController";
 
 export class App {
   constructor(config) {
@@ -39,13 +41,15 @@ export class App {
     this.services.trimestres = new TrimestreService(this);
     this.services.dashboard = new DashboardService(this);
     this.services.niveaux = new NiveauService(this);
+    this.services.classes = new ClassService(this)
 
     this.controllers = {
       auth: new AuthController(this),
       dashboard: new DashboardController(this),
       niveaux: new NiveauController(this),
       annee_scolaire: new AnneeScolaireController(this),
-      trimestres: new TrimestreController(this)
+      trimestres: new TrimestreController(this),
+      classes: new ClassController(this)
     };
 
     this.router = new Router(this, {

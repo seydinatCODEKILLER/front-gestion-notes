@@ -98,6 +98,11 @@ export class AdminLayout {
         icon: "ri-bubble-chart-line",
         path: "/admin/trimestres",
       },
+      {
+        text: "Gestion Classes",
+        icon: "ri-brush-ai-line",
+        path: "/admin/classes",
+      },
     ];
   }
 
