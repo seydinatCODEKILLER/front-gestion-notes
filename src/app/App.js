@@ -29,6 +29,8 @@ import { StudentService } from "@/features/admin/etudiant/StudentService";
 import { StudentController } from "@/features/admin/etudiant/StudentController";
 import { SubjectService } from "@/features/admin/matieres/SubjectService";
 import { SubjectController } from "@/features/admin/matieres/SubjectController";
+import { TeacherSubjectService } from "@/features/admin/teacher_subject/TeacherSubjectService";
+import { TeacherSubjectController } from "@/features/admin/teacher_subject/TeacherSubjectController";
 
 export class App {
   constructor(config) {
@@ -51,6 +53,7 @@ export class App {
     this.services.teachers = new TeacherService(this);
     this.services.students = new StudentService(this);
     this.services.subjects = new SubjectService(this);
+    this.services.teacherSubjects = new TeacherSubjectService(this);
 
     this.controllers = {
       auth: new AuthController(this),
@@ -62,6 +65,7 @@ export class App {
       teachers: new TeacherController(this),
       students: new StudentController(this),
       subjects: new SubjectController(this),
+      teacherSubjects: new TeacherSubjectController(this)
     };
 
     this.router = new Router(this, {

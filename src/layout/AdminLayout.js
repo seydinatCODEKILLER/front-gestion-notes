@@ -118,6 +118,11 @@ export class AdminLayout {
         icon: "ri-bug-2-line",
         path: "/admin/matieres",
       },
+      {
+        text: "Affectation Matieres",
+        icon: "ri-chat-quote-line",
+        path: "/admin/affectations",
+      },
     ];
   }
 
