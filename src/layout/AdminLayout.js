@@ -119,7 +119,7 @@ export class AdminLayout {
         path: "/admin/matieres",
       },
       {
-        text: "Affectation Matieres",
+        text: "Affectation",
         icon: "ri-chat-quote-line",
         path: "/admin/affectations",
       },
@@ -127,6 +127,11 @@ export class AdminLayout {
         text: "Affectation Classe",
         icon: "ri-git-pr-draft-line",
         path: "/admin/affectClasse",
+      },
+      {
+        text: "Gestion Bulleion",
+        icon: "ri-file-pdf-2-line",
+        path: "/admin/bulletins",
       },
     ];
   }
