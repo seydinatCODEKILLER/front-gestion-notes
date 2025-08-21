@@ -9,6 +9,7 @@ import { AdminTeacherView } from "@/features/admin/professeur/AdminTeacherView.j
 import { AdminStudentView } from "@/features/admin/etudiant/AdminStudentView.js";
 import { AdminSubjectView } from "@/features/admin/matieres/AdminSubjectView.js";
 import { AdminTeacherSubjectView } from "@/features/admin/teacher_subject/AdminTeacherSubjectView.js";
+import { AdminClassSubjectView } from "@/features/admin/classe_subject/AdminClassSubjectView.js";
 
 export const adminRoutes = [
   {
@@ -98,6 +99,16 @@ export const adminRoutes = [
       layout: "admin",
       requiresAuth: true,
       title: "Admin | Affectation matieres",
+    },
+    guards: [AuthGuard, AdminGuard],
+  },
+  {
+    path: "/admin/affectClasse",
+    component: AdminClassSubjectView,
+    meta: {
+      layout: "admin",
+      requiresAuth: true,
+      title: "Admin | Affectation classes",
     },
     guards: [AuthGuard, AdminGuard],
   },

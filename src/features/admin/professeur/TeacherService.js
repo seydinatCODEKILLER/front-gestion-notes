@@ -5,8 +5,19 @@ export class TeacherService extends AbstractService {
     super(app);
   }
 
-  async getAllTeachers() {
-    const response = await this.get("/api/teachers");
+    async getAllTeachers(options = {}) {
+    const {
+      includeInactive = false,
+      includeSubjects = false,
+    } = options;
+
+    // Construction des paramètres de requête
+    const params = {
+      includeInactive: includeInactive.toString(),
+      includeSubjects: includeSubjects.toString(),
+    };
+
+    const response = await this.get("/api/teachers", params);
     return response.data;
   }
 

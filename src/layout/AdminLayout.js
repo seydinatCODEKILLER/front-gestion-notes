@@ -123,6 +123,11 @@ export class AdminLayout {
         icon: "ri-chat-quote-line",
         path: "/admin/affectations",
       },
+      {
+        text: "Affectation Classe",
+        icon: "ri-git-pr-draft-line",
+        path: "/admin/affectClasse",
+      },
     ];
   }
 
