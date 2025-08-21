@@ -41,9 +41,18 @@ export const validators = {
     }
   },
   date: (value) => {
-  if (!value) return false;
-  const d = new Date(value);
-  return !isNaN(d.getTime());
-},
-
+    if (!value) return false;
+    const d = new Date(value);
+    return !isNaN(d.getTime());
+  },
+  isUniqueForNiveau: async (
+    value,
+    niveauId,
+    existsFunction,
+    excludeId = null
+  ) => {
+    if (!value) return true;
+    const exists = await existsFunction(value, niveauId, excludeId);
+    return !exists || `${value} existe déjà pour ce niveau`;
+  },
 };

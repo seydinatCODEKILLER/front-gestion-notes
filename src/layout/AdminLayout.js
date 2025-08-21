@@ -113,6 +113,11 @@ export class AdminLayout {
         icon: "ri-shapes-line",
         path: "/admin/etudiants",
       },
+      {
+        text: "Mes Matieres",
+        icon: "ri-bug-2-line",
+        path: "/admin/matieres",
+      },
     ];
   }
 
