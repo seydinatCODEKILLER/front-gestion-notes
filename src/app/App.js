@@ -37,10 +37,10 @@ import { ReportCardService } from "@/features/admin/bulletins/ReportCardService"
 import { ReportCardController } from "@/features/admin/bulletins/ReportCardController";
 import { TeacherLayout } from "@/layout/TeacherLayout";
 import { teacherRoutes } from "@/routes/TeacherRoute";
-import { GradeController } from "@/features/teacher/note/GradeController";
-import { GradeService } from "@/features/teacher/note/GradeService";
 import { EvaluationController } from "@/features/teacher/evaluation/EvaluationController";
 import { EvaluationService } from "@/features/teacher/evaluation/EvaluationService";
+import { GradeService } from "@/features/teacher/notes/GradeService";
+import { GradeController } from "@/features/teacher/notes/GradeController";
 
 export class App {
   constructor(config) {
@@ -66,8 +66,8 @@ export class App {
     this.services.teacherSubjects = new TeacherSubjectService(this);
     this.services.classSubjects = new ClassSubjectService(this);
     this.services.reportCards = new ReportCardService(this);
-    this.services.grades = new GradeService(this);
     this.services.evaluations = new EvaluationService(this);
+    this.services.grades = new GradeService(this);
 
     this.controllers = {
       auth: new AuthController(this),
@@ -82,8 +82,8 @@ export class App {
       teacherSubjects: new TeacherSubjectController(this),
       classSubjects: new ClassSubjectController(this),
       reportCards: new ReportCardController(this),
-      grades: new GradeController(this),
       evaluations: new EvaluationController(this),
+      grades: new GradeController(this),
     };
 
     this.router = new Router(this, {

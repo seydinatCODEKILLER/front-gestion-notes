@@ -163,12 +163,27 @@ export class EvaluationCard {
     return types[type] || type;
   }
 
+  // Dans EvaluationCard.js - Mise à jour de la méthode renderActions
   renderActions(item) {
     const actionsContainer = document.createElement("div");
     actionsContainer.className = "flex gap-2";
 
+    const hasGrades =
+      (item.grades && item.grades.length > 0) ||
+      (item._count && item._count.notes > 0);
+
+
     this.config.actions.items
-      .filter((action) => !action.visible || action.visible(item))
+      .filter((action) => {
+        if (!action.visible || action.visible(item)) {
+          // Masquer "Noter" si des notes existent déjà
+          if (action.name === "grade" && hasGrades) return false;
+          // Masquer "Modifier" si aucune note n'existe
+          if (action.name === "editGrades" && !hasGrades) return false;
+          return true;
+        }
+        return false;
+      })
       .forEach((action) => {
         const button = document.createElement("button");
         button.className = `btn btn-sm ${
@@ -178,23 +193,23 @@ export class EvaluationCard {
         }`;
 
         button.innerHTML = `
-          <i class="${
-            typeof action.icon === "function" ? action.icon(item) : action.icon
-          }"></i>
-          ${
-            action.label
-              ? `
-            <span class="hidden sm:inline">
-              ${
-                typeof action.label === "function"
-                  ? action.label(item)
-                  : action.label
-              }
-            </span>
-          `
-              : ""
-          }
-        `;
+        <i class="${
+          typeof action.icon === "function" ? action.icon(item) : action.icon
+        }"></i>
+        ${
+          action.label
+            ? `
+          <span class="hidden sm:inline">
+            ${
+              typeof action.label === "function"
+                ? action.label(item)
+                : action.label
+            }
+          </span>
+        `
+            : ""
+        }
+      `;
 
         button.onclick = (e) => {
           e.stopPropagation();

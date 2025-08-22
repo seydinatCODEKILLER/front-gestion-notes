@@ -3,7 +3,7 @@ import { TeacherGuard } from "@/app/guard/RoleGuard";
 import { TeacherClassView } from "@/features/teacher/classes/TeacherClassView";
 import { AdminEvaluationView } from "@/features/teacher/evaluation/AdminEvaluationView";
 import { TeacherSubjectView } from "@/features/teacher/matieres/TeacherSubjectView";
-import { GradeEntryView } from "@/features/teacher/note/GradeEntryView";
+import { AdminEvaluationNoteView } from "@/features/teacher/notes/AdminEvaluationNoteView";
 
 
 export const teacherRoutes = [
@@ -36,5 +36,15 @@ export const teacherRoutes = [
       title: "Professeur | evaluations",
     },
     guards: [AuthGuard, TeacherGuard],
-  }
+  },
+  {
+    path: "/teacher/notes",
+    component: AdminEvaluationNoteView,
+    meta: {
+      layout: "teacher",
+      requiresAuth: true,
+      title: "Professeur | notes",
+    },
+    guards: [AuthGuard, TeacherGuard],
+  },
 ];

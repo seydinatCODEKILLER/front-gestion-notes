@@ -1,26 +1,17 @@
 import { EvaluationCard } from "@/components/card/EvaluationCard.js";
 import { ModernTable } from "@/components/table/Table.js";
-import { FloatingActionButton } from "@/components/button/FloatingButton.js";
 import { Modal } from "@/components/modal/Modal.js";
 import { AbstractView } from "@/app/abstract/AbstractView.js";
 import { Banner } from "@/components/banner/Banner";
-import { EvaluationFormModal } from "./EvaluationFormModal";
-import { GradeModal } from "../notes/GradeModal.js";
+import { GradeModal } from "./GradeModal.js";
 
-export class AdminEvaluationView extends AbstractView {
+export class AdminEvaluationNoteView extends AbstractView {
   constructor(app, { params, route } = {}) {
     super(app, { params, route });
     this.controller = app.getController("evaluations");
     this.currentTeacher = app.getService("auth").getCurrentUser();
     this.currentView = "cards";
     this.localEvaluations = [];
-
-    this.formModal = new EvaluationFormModal(app, this.localEvaluations, {
-      onSave: async () => {
-        this.localEvaluations = await this.controller.loadTeacherEvaluations(true);
-        this.renderContent();
-      },
-    });
   }
 
   async setup() {
@@ -139,12 +130,6 @@ export class AdminEvaluationView extends AbstractView {
         displayMode: "direct",
         items: [
           {
-            name: "edit",
-            label: "Modifier",
-            icon: "ri-edit-line",
-            visible: (item) => new Date(item.date_evaluation) >= new Date(),
-          },
-          {
             name: "grade",
             label: "Noter",
             icon: "ri-pencil-line",
@@ -157,14 +142,7 @@ export class AdminEvaluationView extends AbstractView {
             icon: "ri-edit-2-line",
             className: "btn-warning",
             action: "editGrades",
-          },
-          {
-            name: "delete",
-            label: "Supprimer",
-            icon: "ri-delete-bin-line",
-            className: "btn-error",
-            action: "delete",
-          },
+          }
         ],
       },
       onAction: (action, id, actionType) =>
@@ -259,12 +237,6 @@ export class AdminEvaluationView extends AbstractView {
         displayMode: "direct",
         items: [
           {
-            name: "edit",
-            label: "Modifier",
-            icon: "ri-edit-line",
-            visible: (item) => new Date(item.date_evaluation) >= new Date(),
-          },
-          {
             name: "grade",
             label: "Noter",
             icon: "ri-pencil-line",
@@ -277,14 +249,7 @@ export class AdminEvaluationView extends AbstractView {
             icon: "ri-edit-2-line",
             className: "btn-warning",
             action: "editGrades",
-          },
-          {
-            name: "delete",
-            label: "Supprimer",
-            icon: "ri-delete-bin-line",
-            className: "btn-error",
-            action: "delete",
-          },
+          }
         ],
       },
       onAction: (action, id, actionType) =>
@@ -295,29 +260,11 @@ export class AdminEvaluationView extends AbstractView {
     table.update(this.localEvaluations, 1);
   }
 
-  initFloatingButton() {
-    this.fab = new FloatingActionButton({
-      icon: "ri-add-line",
-      color: "primary",
-      position: "bottom-right",
-      size: "lg",
-      onClick: () => {
-        this.formModal.open();
-      },
-    });
-  }
-
   async handleEvaluationAction(action, id, actionType) {
     const evaluation = this.findEvaluationById(id);
     if (!evaluation) return;
     try {
       switch (action) {
-        case "edit":
-          await this.handleEditAction(evaluation);
-          break;
-        case "delete":
-          await this.handleDeleteAction(id);
-          break;
         case "grade": // Nouvelle action pour noter
           await this.handleGradeAction(evaluation, false);
           break;
@@ -334,32 +281,6 @@ export class AdminEvaluationView extends AbstractView {
 
   findEvaluationById(id) {
     return this.localEvaluations.find((e) => e.id == id);
-  }
-
-  async handleEditAction(evaluation) {
-    const modal = new EvaluationEditModal(this.app, evaluation, {
-      onSave: async () => {
-        this.localEvaluations = await this.controller.loadEvaluations(true);
-        this.renderContent();
-      },
-    });
-    await modal.open();
-  }
-
-  async handleDeleteAction(id) {
-    const confirmed = await this.showConfirmation(
-      "Supprimer cette évaluation ? Cette action est irréversible."
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await this.controller.deleteEvaluation(id);
-      this.localEvaluations = await this.controller.loadEvaluations(true);
-      this.renderContent();
-    } catch (error) {
-      this.handleActionError(error);
-    }
   }
 
   handleActionError(error) {

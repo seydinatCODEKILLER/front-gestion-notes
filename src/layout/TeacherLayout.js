@@ -97,6 +97,11 @@ export class TeacherLayout {
         text: "Gestion evaluations",
         icon: "ri-bubble-chart-line",
         path: "/teacher/evaluations",
+      },
+      {
+        text: "Gestion notes",
+        icon: "ri-bubble-chart-line",
+        path: "/teacher/notes",
       }
     ];
   }

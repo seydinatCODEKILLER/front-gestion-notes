@@ -55,4 +55,15 @@ export const validators = {
     const exists = await existsFunction(value, niveauId, excludeId);
     return !exists || `${value} existe déjà pour ce niveau`;
   },
+  numberRange: (value, min, max) => {
+    const num = parseFloat(value);
+    return !isNaN(num) && num >= min && num <= max;
+  },
+
+  isFutureDate: (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  },
 };
