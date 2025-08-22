@@ -2,7 +2,7 @@ import { ResponsiveHeader } from "@/components/header/Header";
 import Sidebar from "@/components/sidebar/Sidebar";
 
 
-export class AdminLayout {
+export class TeacherLayout {
   constructor(app) {
     this.app = app;
     this.container = this.#createLayoutContainer();
@@ -42,7 +42,7 @@ export class AdminLayout {
     
 
     this.headerInstance = new ResponsiveHeader({
-      currentPage: "Admin",
+      currentPage: "Professeur",
       userName: `${prenom} ${nom}` || "Admin",
       onMenuClick: () => this.toggleSidebar(),
       onThemeChange: () => this.toggleTheme(),
@@ -64,7 +64,7 @@ export class AdminLayout {
       user: {
         avatar: avatar || "",
         role: "Admin",
-        name: `${prenom} ${nom}` || "Admin",
+        name: `${prenom} ${nom}` || "Professeur",
       },
       links: this.#getSidebarLinks(),
       onNavigate: (path) => this.app.router.navigateTo(path),
@@ -78,61 +78,26 @@ export class AdminLayout {
 
   #getSidebarLinks() {
     return [
+      //   {
+      //     text: "Dashboard",
+      //     icon: "ri-dashboard-line",
+      //     path: "/teacher/dashboard",
+      //   },
       {
-        text: "Dashboard",
-        icon: "ri-dashboard-line",
-        path: "/admin/dashboard",
-      },
-      {
-        text: "Gestion Niveaux",
+        text: "Mes Classes",
         icon: "ri-stack-line",
-        path: "/admin/niveaux",
-      },
-      {
-        text: "Gestion Annees",
-        icon: "ri-attachment-line",
-        path: "/admin/annees",
-      },
-      {
-        text: "Gestion Trimestres",
-        icon: "ri-bubble-chart-line",
-        path: "/admin/trimestres",
-      },
-      {
-        text: "Gestion Classes",
-        icon: "ri-brush-ai-line",
-        path: "/admin/classes",
-      },
-      {
-        text: "Mes Professeurs",
-        icon: "ri-shadow-line",
-        path: "/admin/professeurs",
-      },
-      {
-        text: "Mes Etudiants",
-        icon: "ri-shapes-line",
-        path: "/admin/etudiants",
+        path: "/teacher/classes",
       },
       {
         text: "Mes Matieres",
-        icon: "ri-bug-2-line",
-        path: "/admin/matieres",
+        icon: "ri-attachment-line",
+        path: "/teacher/matieres",
       },
       {
-        text: "Affectation",
-        icon: "ri-chat-quote-line",
-        path: "/admin/affectations",
-      },
-      {
-        text: "Affectation Classe",
-        icon: "ri-git-pr-draft-line",
-        path: "/admin/affectClasse",
-      },
-      {
-        text: "Gestion Bulletin",
-        icon: "ri-file-pdf-2-line",
-        path: "/admin/bulletins",
-      },
+        text: "Gestion evaluations",
+        icon: "ri-bubble-chart-line",
+        path: "/teacher/evaluations",
+      }
     ];
   }
 

@@ -14,3 +14,6 @@ export const AdminGuard = {
   execute: RoleGuard.requiredRole("admin"),
 };
 
+export const TeacherGuard = {
+  execute: RoleGuard.requiredRole("professeur"),
+};

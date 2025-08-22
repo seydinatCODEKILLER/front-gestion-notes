@@ -1,12 +1,12 @@
-export class SubjectCard {
+export class EvaluationCard {
   constructor(config) {
     this.config = {
       data: [],
       itemsPerPage: 8,
-      containerId: "subject-cards",
+      containerId: "evaluation-cards",
       actions: null,
       onAction: null,
-      emptyMessage: "Aucune matière disponible",
+      emptyMessage: "Aucune évaluation disponible",
       ...config,
     };
 
@@ -78,18 +78,18 @@ export class SubjectCard {
       return;
     }
 
-    itemsToShow.forEach((subject) => {
-      this.grid.appendChild(this.createSubjectCard(subject));
+    itemsToShow.forEach((evaluation) => {
+      this.grid.appendChild(this.createEvaluationCard(evaluation));
     });
 
     this.updatePagination();
   }
 
-  createSubjectCard(subject) {
+  createEvaluationCard(evaluation) {
     const card = document.createElement("div");
     card.className =
       "card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 h-full flex flex-col";
-    card.dataset.id = subject.id;
+    card.dataset.id = evaluation.id;
 
     const cardBody = document.createElement("div");
     cardBody.className = "p-6 flex-grow flex flex-col";
@@ -99,33 +99,39 @@ export class SubjectCard {
     header.className = "flex items-center mb-4";
     header.innerHTML = `
       <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-        <i class="ri-book-line text-blue-600 text-xl"></i>
+        <i class="ri-file-text-line text-blue-600 text-xl"></i>
       </div>
       <div>
-        <h3 class="text-lg font-semibold">${subject.subject.nom}</h3>
-        <p class="text-sm text-gray-500">${subject.subject.niveauId || "N/A"}</p>
+        <h3 class="text-lg font-semibold">${evaluation.titre}</h3>
+        <p class="text-sm text-gray-500">${evaluation.subject?.nom || "N/A"}</p>
       </div>
     `;
 
-    // Coefficient badge
-    const coefficient = document.createElement("div");
-    coefficient.className = "badge badge-info badge-sm self-start mb-2";
-    coefficient.textContent = `Coeff: ${subject.subject.coefficient}`;
-
-    // Status badge
-    const status = document.createElement("div");
-    status.className = `badge badge-${
-      subject.statut === "actif" ? "success" : "warning"
-    } badge-sm self-start mb-4`;
-    status.textContent = subject.statut === "actif" ? "Actif" : "Inactif";
-
-    // Description (if exists)
-    let descriptionElement = null;
-    if (subject.subject.description) {
-      descriptionElement = document.createElement("p");
-      descriptionElement.className = "text-sm text-gray-600 mb-4 line-clamp-2";
-      descriptionElement.textContent = subject.subject.description;
-    }
+    // Details
+    const details = document.createElement("div");
+    details.className = "space-y-2 mb-4";
+    details.innerHTML = `
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-500">Classe:</span>
+        <span class="font-medium">${evaluation.class?.nom || "N/A"}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-500">Type:</span>
+        <span class="font-medium">${this.getTypeLabel(evaluation.type)}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-500">Date:</span>
+        <span class="font-medium">${new Date(
+          evaluation.date_evaluation
+        ).toLocaleDateString()}</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-500">Trimestre:</span>
+        <span class="font-medium">${
+          evaluation.trimestre?.libelle || "N/A"
+        }</span>
+      </div>
+    `;
 
     // Actions
     const cardActions = document.createElement("div");
@@ -133,22 +139,28 @@ export class SubjectCard {
       "flex justify-end items-center pt-4 border-t border-base-200 mt-auto";
 
     if (this.config.actions) {
-      cardActions.appendChild(this.renderActions(subject));
+      cardActions.appendChild(this.renderActions(evaluation));
     }
 
     // Assemble card body
     cardBody.appendChild(header);
-    cardBody.appendChild(coefficient);
-    cardBody.appendChild(status);
-    if (descriptionElement) {
-      cardBody.appendChild(descriptionElement);
-    }
+    cardBody.appendChild(details);
     cardBody.appendChild(cardActions);
 
     // Assemble card
     card.appendChild(cardBody);
 
     return card;
+  }
+
+  getTypeLabel(type) {
+    const types = {
+      devoir: "Devoir",
+      composition: "Composition",
+      oral: "Oral",
+      projet: "Projet",
+    };
+    return types[type] || type;
   }
 
   renderActions(item) {
@@ -202,7 +214,7 @@ export class SubjectCard {
     emptyMessage.className =
       "col-span-full text-center p-8 text-base-content/50";
     emptyMessage.innerHTML = `
-      <i class="ri-book-line text-4xl mb-2"></i>
+      <i class="ri-file-text-line text-4xl mb-2"></i>
       <p>${this.config.emptyMessage}</p>
     `;
     this.grid.appendChild(emptyMessage);
@@ -215,7 +227,7 @@ export class SubjectCard {
 
     this.prevBtn.disabled = this.currentPage === 1;
     this.nextBtn.disabled = this.currentPage === totalPages || totalPages === 0;
-    this.paginationInfo.textContent = `Page ${this.currentPage} sur ${totalPages} • ${this.config.data.length} matières`;
+    this.paginationInfo.textContent = `Page ${this.currentPage} sur ${totalPages} • ${this.config.data.length} évaluations`;
   }
 
   setupEvents() {

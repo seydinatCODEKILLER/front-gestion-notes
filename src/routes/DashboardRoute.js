@@ -104,6 +104,16 @@ export const adminRoutes = [
     guards: [AuthGuard, AdminGuard],
   },
   {
+    path: "/admin/affectClasse",
+    component: AdminClassSubjectView,
+    meta: {
+      layout: "admin",
+      requiresAuth: true,
+      title: "Admin | Affectation classe",
+    },
+    guards: [AuthGuard, AdminGuard],
+  },
+  {
     path: "/admin/bulletins",
     component: AdminReportCardView,
     meta: {

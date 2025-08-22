@@ -115,6 +115,25 @@ export class SubjectController {
     }
   }
 
+  async loadTeacherSubjects(teacherId, forceRefresh = false) {
+    try {
+      if (!forceRefresh && this.cache.subjects && this.isCacheValid()) {
+        return this.cache.subjects;
+      }
+
+      const subjects = await this.service.getSubjectsByTeacher(teacherId);
+      this.cache.subjects = subjects;
+      this.cache.lastUpdated = Date.now();
+      return subjects;
+    } catch (error) {
+      this.app.services.notifications.show(
+        "Impossible de charger vos matières",
+        "error"
+      );
+      throw error;
+    }
+  }
+
   clearCache() {
     this.cache.subjects = null;
   }

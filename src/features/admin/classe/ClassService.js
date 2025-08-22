@@ -58,4 +58,14 @@ export class ClassService extends AbstractService {
       return false;
     }
   }
+
+  async getClassesByTeacher(teacherId) {
+    const response = await this.get(`/api/classes/teacher/${teacherId}`);
+    return response.data;
+  }
+
+  async getClassWithStudents(classId) {
+    const response = await this.get(`/api/classes/${classId}/student`);
+    return response.data;
+  }
 }

@@ -48,11 +48,10 @@ export class AuthController {
     });
   }
 
-  // Méthodes privées
   redirectAfterLogin(role) {
     const routes = {
       admin: "/admin/dashboard",
-      professeur: "/professeur/dashboard",
+      professeur: "/teacher/classes",
     };
     this.app.router.navigateTo(routes[role] || "/");
   }

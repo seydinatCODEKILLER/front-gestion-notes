@@ -35,6 +35,12 @@ import { ClassSubjectService } from "@/features/admin/classe_subject/ClassSubjec
 import { ClassSubjectController } from "@/features/admin/classe_subject/ClassSubjectController";
 import { ReportCardService } from "@/features/admin/bulletins/ReportCardService";
 import { ReportCardController } from "@/features/admin/bulletins/ReportCardController";
+import { TeacherLayout } from "@/layout/TeacherLayout";
+import { teacherRoutes } from "@/routes/TeacherRoute";
+import { GradeController } from "@/features/teacher/note/GradeController";
+import { GradeService } from "@/features/teacher/note/GradeService";
+import { EvaluationController } from "@/features/teacher/evaluation/EvaluationController";
+import { EvaluationService } from "@/features/teacher/evaluation/EvaluationService";
 
 export class App {
   constructor(config) {
@@ -60,6 +66,8 @@ export class App {
     this.services.teacherSubjects = new TeacherSubjectService(this);
     this.services.classSubjects = new ClassSubjectService(this);
     this.services.reportCards = new ReportCardService(this);
+    this.services.grades = new GradeService(this);
+    this.services.evaluations = new EvaluationService(this);
 
     this.controllers = {
       auth: new AuthController(this),
@@ -74,6 +82,8 @@ export class App {
       teacherSubjects: new TeacherSubjectController(this),
       classSubjects: new ClassSubjectController(this),
       reportCards: new ReportCardController(this),
+      grades: new GradeController(this),
+      evaluations: new EvaluationController(this),
     };
 
     this.router = new Router(this, {
@@ -82,10 +92,12 @@ export class App {
 
     this.router.addLayout("auth", AuthLayout);
     this.router.addLayout("admin", AdminLayout);
+    this.router.addLayout("teacher", TeacherLayout);
     this.router.addLayout("error", ErrorLayout);
 
     this.router.addRoutes(authRoutes);
     this.router.addRoutes(adminRoutes);
+    this.router.addRoutes(teacherRoutes);
     this.router.addRoutes(errorRoutes);
 
     this.initModules();

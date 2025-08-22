@@ -41,7 +41,8 @@ export class AdminReportCardView extends AbstractView {
       // Bouton flottant
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des bulletins");
+      // this.showError("Erreur de chargement des bulletins");
+      console.log(error);
     }
   }
 

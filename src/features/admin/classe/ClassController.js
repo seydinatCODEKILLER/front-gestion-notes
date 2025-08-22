@@ -125,6 +125,37 @@ export class ClassController {
     }
   }
 
+  async loadTeacherClasses(teacherId, forceRefresh = false) {
+    try {
+      if (!forceRefresh && this.cache.classes && this.isCacheValid()) {
+        return this.cache.classes;
+      }
+
+      const classes = await this.service.getClassesByTeacher(teacherId);
+      this.cache.classes = classes;
+      this.cache.lastUpdated = Date.now();
+      return classes;
+    } catch (error) {
+      this.app.services.notifications.show(
+        "Impossible de charger vos classes",
+        "error"
+      );
+      throw error;
+    }
+  }
+
+  async getClassWithStudents(classId) {
+    try {
+      return await this.service.getClassWithStudents(classId);
+    } catch (error) {
+      this.app.services.notifications.show(
+        "Impossible de charger les détails de la classe",
+        "error"
+      );
+      throw error;
+    }
+  }
+
   clearCache() {
     this.cache.classes = null;
   }

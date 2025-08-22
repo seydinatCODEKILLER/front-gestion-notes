@@ -49,4 +49,10 @@ export class SubjectService extends AbstractService {
       return false;
     }
   }
+    async getSubjectsByTeacher(teacherId) {
+    const response = await this.get(
+      `/api/teacher-subjects/teacher/${teacherId}`
+    );
+    return response.data;
+  }
 }
