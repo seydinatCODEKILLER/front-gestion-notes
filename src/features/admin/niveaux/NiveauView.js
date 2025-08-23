@@ -33,7 +33,8 @@ export class AdminNiveauView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des niveaux");
+      console.log(error)
+      // this.showError("Erreur de chargement des niveaux");
     }
   }
 

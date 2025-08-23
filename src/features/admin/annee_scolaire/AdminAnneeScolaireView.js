@@ -31,7 +31,8 @@ export class AdminAnneeScolaireView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des années scolaires");
+      console.log(error)
+      // this.showError("Erreur de chargement des années scolaires");
     }
   }
 

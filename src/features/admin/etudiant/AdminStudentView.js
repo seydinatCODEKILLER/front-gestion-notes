@@ -32,7 +32,8 @@ export class AdminStudentView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des élèves");
+console.log(error)
+      // this.showError("Erreur de chargement des élèves");
     }
   }
 

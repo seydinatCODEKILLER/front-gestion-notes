@@ -24,7 +24,8 @@ export class AdminClassSubjectView extends AbstractView {
       this.createBanner();
       this.renderContent();
     } catch (error) {
-      this.showError("Erreur de chargement des données");
+console.log(error)
+      // this.showError("Erreur de chargement des données");
     }
   }
 

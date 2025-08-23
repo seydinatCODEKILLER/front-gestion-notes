@@ -6,6 +6,7 @@ import { AbstractView } from "@/app/abstract/AbstractView.js";
 import { Banner } from "@/components/banner/Banner";
 import { EvaluationFormModal } from "./EvaluationFormModal";
 import { GradeModal } from "../notes/GradeModal.js";
+import { EvaluationEditModal } from "./EvaluationEditModal";
 
 export class AdminEvaluationView extends AbstractView {
   constructor(app, { params, route } = {}) {
@@ -17,7 +18,7 @@ export class AdminEvaluationView extends AbstractView {
 
     this.formModal = new EvaluationFormModal(app, this.localEvaluations, {
       onSave: async () => {
-        this.localEvaluations = await this.controller.loadTeacherEvaluations(true);
+        this.localEvaluations = await this.controller.loadEvaluations(true);
         this.renderContent();
       },
     });
@@ -32,7 +33,7 @@ export class AdminEvaluationView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des évaluations");
+      console.log(error)
     }
   }
 
@@ -145,20 +146,6 @@ export class AdminEvaluationView extends AbstractView {
             visible: (item) => new Date(item.date_evaluation) >= new Date(),
           },
           {
-            name: "grade",
-            label: "Noter",
-            icon: "ri-pencil-line",
-            className: "btn-success",
-            action: "grade",
-          },
-          {
-            name: "editGrades",
-            label: "Modifier notes",
-            icon: "ri-edit-2-line",
-            className: "btn-warning",
-            action: "editGrades",
-          },
-          {
             name: "delete",
             label: "Supprimer",
             icon: "ri-delete-bin-line",
@@ -265,20 +252,6 @@ export class AdminEvaluationView extends AbstractView {
             visible: (item) => new Date(item.date_evaluation) >= new Date(),
           },
           {
-            name: "grade",
-            label: "Noter",
-            icon: "ri-pencil-line",
-            className: "btn-success",
-            action: "grade",
-          },
-          {
-            name: "editGrades",
-            label: "Modifier notes",
-            icon: "ri-edit-2-line",
-            className: "btn-warning",
-            action: "editGrades",
-          },
-          {
             name: "delete",
             label: "Supprimer",
             icon: "ri-delete-bin-line",
@@ -317,12 +290,6 @@ export class AdminEvaluationView extends AbstractView {
           break;
         case "delete":
           await this.handleDeleteAction(id);
-          break;
-        case "grade": // Nouvelle action pour noter
-          await this.handleGradeAction(evaluation, false);
-          break;
-        case "editGrades": // Nouvelle action pour modifier les notes
-          await this.handleGradeAction(evaluation, true);
           break;
         default:
           console.warn(`Action non gérée: ${action}`);

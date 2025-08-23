@@ -129,7 +129,7 @@ export class GradeModal {
     this.modal = new Modal({
       title: this.isEditMode ? "Modifier les notes" : "Saisir les notes",
       content: this.form,
-      size: "lg",
+      size: "2xl",
       footerButtons: this.getFooterButtons(),
     });
   }

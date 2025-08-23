@@ -216,7 +216,7 @@ export class AbstractEvaluationModal {
     this.modal = new Modal({
       title: this.config.title || "Évaluation",
       content: this.form,
-      size: "lg",
+      size: "2xl",
       footerButtons: this.getFooterButtons(),
     });
   }

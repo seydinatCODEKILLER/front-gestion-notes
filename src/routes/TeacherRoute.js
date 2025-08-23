@@ -3,6 +3,7 @@ import { TeacherGuard } from "@/app/guard/RoleGuard";
 import { TeacherClassView } from "@/features/teacher/classes/TeacherClassView";
 import { AdminEvaluationView } from "@/features/teacher/evaluation/AdminEvaluationView";
 import { TeacherSubjectView } from "@/features/teacher/matieres/TeacherSubjectView";
+import { AverageView } from "@/features/teacher/moyenne/AverageView";
 import { AdminEvaluationNoteView } from "@/features/teacher/notes/AdminEvaluationNoteView";
 
 
@@ -44,6 +45,16 @@ export const teacherRoutes = [
       layout: "teacher",
       requiresAuth: true,
       title: "Professeur | notes",
+    },
+    guards: [AuthGuard, TeacherGuard],
+  },
+  {
+    path: "/teacher/averages",
+    component: AverageView,
+    meta: {
+      layout: "teacher",
+      requiresAuth: true,
+      title: "Professeur | moyennes",
     },
     guards: [AuthGuard, TeacherGuard],
   },

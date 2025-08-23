@@ -29,7 +29,6 @@ export class TeacherClassView extends AbstractView {
       this.renderContent();
     } catch (error) {
     console.log(error)
-      this.showError("Erreur de chargement de vos classes");
     }
   }
 

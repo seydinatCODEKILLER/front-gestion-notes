@@ -23,7 +23,7 @@ export class AdminEvaluationNoteView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des évaluations");
+      console.log(error)
     }
   }
 

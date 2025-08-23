@@ -35,7 +35,7 @@ export class ClassDetailsModal {
     this.modal = new Modal({
       title: `Détails de la classe: ${this.classe.nom}`,
       content: content,
-      size: "xl",
+      size: "2xl",
       footerButtons: [
         {
           text: "Fermer",

@@ -78,11 +78,6 @@ export class TeacherLayout {
 
   #getSidebarLinks() {
     return [
-      //   {
-      //     text: "Dashboard",
-      //     icon: "ri-dashboard-line",
-      //     path: "/teacher/dashboard",
-      //   },
       {
         text: "Mes Classes",
         icon: "ri-stack-line",
@@ -102,7 +97,12 @@ export class TeacherLayout {
         text: "Gestion notes",
         icon: "ri-bubble-chart-line",
         path: "/teacher/notes",
-      }
+      },
+        {
+          text: "Gestion moyenne",
+          icon: "ri-dashboard-line",
+          path: "/teacher/averages",
+        }
     ];
   }
 

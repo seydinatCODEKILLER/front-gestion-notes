@@ -41,6 +41,8 @@ import { EvaluationController } from "@/features/teacher/evaluation/EvaluationCo
 import { EvaluationService } from "@/features/teacher/evaluation/EvaluationService";
 import { GradeService } from "@/features/teacher/notes/GradeService";
 import { GradeController } from "@/features/teacher/notes/GradeController";
+import { AverageService } from "@/features/teacher/moyenne/AverageService";
+import { AverageController } from "@/features/teacher/moyenne/AverageController";
 
 export class App {
   constructor(config) {
@@ -68,6 +70,7 @@ export class App {
     this.services.reportCards = new ReportCardService(this);
     this.services.evaluations = new EvaluationService(this);
     this.services.grades = new GradeService(this);
+    this.services.averages = new AverageService(this);
 
     this.controllers = {
       auth: new AuthController(this),
@@ -84,6 +87,7 @@ export class App {
       reportCards: new ReportCardController(this),
       evaluations: new EvaluationController(this),
       grades: new GradeController(this),
+      averages: new AverageController(this),
     };
 
     this.router = new Router(this, {

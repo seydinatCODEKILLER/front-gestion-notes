@@ -31,7 +31,9 @@ export class AdminTrimestreView extends AbstractView {
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      this.showError("Erreur de chargement des trimestres");
+            console.log(error)
+      
+      // this.showError("Erreur de chargement des trimestres");
     }
   }
 
