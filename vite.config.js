@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => {
         "@layout": path.resolve(__dirname, "./src/layout"),
       },
     },
+    base: "/",
+    build: {
+      outDir: "dist",
+    },
     server: {
       proxy:
         mode === "development"
