@@ -6,39 +6,39 @@ export class StudentService extends AbstractService {
   }
 
   async getAllStudents() {
-    const response = await this.get("/api/students");
+    const response = await this.get("students");
     return response.data;
   }
 
   async getStudent(id) {
-    const response = await this.get(`/api/students/${id}`);
+    const response = await this.get(`students/${id}`);
     return response.data;
   }
 
   async getStats() {
-    const response = await this.get("/api/students/stats");
+    const response = await this.get("students/stats");
     return response.data;
   }
 
   async createStudent(data) {
-    const response = await this.post("/api/students", data, { formData: true });
+    const response = await this.post("students", data, { formData: true });
     return response.data;
   }
 
   async updateStudent(id, data) {
-    const response = await this.put(`/api/students/${id}`, data, {
+    const response = await this.put(`students/${id}`, data, {
       formData: true,
     });
     return response.data;
   }
 
   async softDeleteStudent(id) {
-    const response = await this.patch(`/api/students/${id}/delete`);
+    const response = await this.patch(`students/${id}/delete`);
     return response.data;
   }
 
   async restoreStudent(id) {
-    const response = await this.patch(`/api/students/${id}/restore`);
+    const response = await this.patch(`students/${id}/restore`);
     return response.data;
   }
 

@@ -83,16 +83,16 @@ export class AdminLayout {
         icon: "ri-dashboard-line",
         path: "/admin/dashboard",
       },
-      {
-        text: "Gestion Niveaux",
-        icon: "ri-stack-line",
-        path: "/admin/niveaux",
-      },
-      {
-        text: "Gestion Annees",
-        icon: "ri-attachment-line",
-        path: "/admin/annees",
-      },
+      // {
+      //   text: "Gestion Niveaux",
+      //   icon: "ri-stack-line",
+      //   path: "/admin/niveaux",
+      // },
+      // {
+      //   text: "Gestion Annees",
+      //   icon: "ri-attachment-line",
+      //   path: "/admin/annees",
+      // },
       {
         text: "Gestion Trimestres",
         icon: "ri-bubble-chart-line",

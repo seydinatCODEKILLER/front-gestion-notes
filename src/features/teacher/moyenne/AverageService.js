@@ -6,26 +6,26 @@ export class AverageService extends AbstractService {
   }
 
   async getClassAverages(classId, filters = {}) {
-    const response = await this.get(`/api/averages/class/${classId}`, filters);
+    const response = await this.get(`averages/class/${classId}`, filters);
     return response.data;
   }
 
   async getStudentAverages(studentId, filters = {}) {
     const response = await this.get(
-      `/api/averages/student/${studentId}`,
+      `averages/student/${studentId}`,
       filters
     );
     return response.data;
   }
 
   async createOrUpdateAverage(data) {
-    const response = await this.post("/api/averages", data);
+    const response = await this.post("averages", data);
     return response.data;
   }
 
   async calculateClassAverages(classId, data) {
     const response = await this.post(
-      `/api/averages/calculate/${classId}`,
+      `averages/calculate/${classId}`,
       data
     );
     return response.data;
@@ -33,14 +33,14 @@ export class AverageService extends AbstractService {
 
   async calculateUpdatedAverages(classId, data) {
     const response = await this.post(
-      `/api/averages/calculateUpdated/${classId}`,
+      `averages/calculateUpdated/${classId}`,
       data
     );
     return response.data;
   }
 
   async getClassGrades(classId, filters = {}) {
-    const response = await this.get(`/api/grades/class/${classId}`, filters);
+    const response = await this.get(`grades/class/${classId}`, filters);
     return response.data;
   }
 }

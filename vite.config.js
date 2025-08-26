@@ -1,9 +1,11 @@
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { loadEnv } from "vite";
 
 export default defineConfig(({ mode }) => {
-  const apiUrl = process.env.VITE_API_URL;
+  const env = loadEnv(mode, process.cwd(), "");
+  const apiUrl = env.VITE_API_URL;
   return {
     plugins: [tailwindcss()],
     resolve: {
@@ -30,6 +32,7 @@ export default defineConfig(({ mode }) => {
               "/api": {
                 target: apiUrl,
                 changeOrigin: true,
+                rewrite: (path) => path,
               },
             }
           : undefined,

@@ -6,42 +6,42 @@ export class ClassService extends AbstractService {
   }
 
   async getAllClasses() {
-    const response = await this.get("/api/classes");
+    const response = await this.get("classes");
     return response.data;
   }
 
   async getClass(id) {
-    const response = await this.get(`/api/classes/${id}`);
+    const response = await this.get(`classes/${id}`);
     return response.data;
   }
 
   async getStats() {
-    const response = await this.get("/api/classes/stats");
+    const response = await this.get("classes/stats");
     return response.data;
   }
 
   async getClassesByTeacher(teacherId) {
-    const response = await this.get(`/api/classes/teacher/${teacherId}`);
+    const response = await this.get(`classes/teacher/${teacherId}`);
     return response.data;
   }
 
   async createClass(data) {
-    const response = await this.post("/api/classes", data);
+    const response = await this.post("classes", data);
     return response.data;
   }
 
   async updateClass(id, data) {
-    const response = await this.put(`/api/classes/${id}`, data);
+    const response = await this.put(`classes/${id}`, data);
     return response.data;
   }
 
   async softDeleteClass(id) {
-    const response = await this.patch(`/api/classes/${id}/delete`);
+    const response = await this.patch(`classes/${id}/delete`);
     return response.data;
   }
 
   async restoreClass(id) {
-    const response = await this.patch(`/api/classes/${id}/restore`);
+    const response = await this.patch(`classes/${id}/restore`);
     return response.data;
   }
 
@@ -60,12 +60,12 @@ export class ClassService extends AbstractService {
   }
 
   async getClassesByTeacher(teacherId) {
-    const response = await this.get(`/api/classes/teacher/${teacherId}`);
+    const response = await this.get(`classes/teacher/${teacherId}`);
     return response.data;
   }
 
   async getClassWithStudents(classId) {
-    const response = await this.get(`/api/classes/${classId}/student`);
+    const response = await this.get(`classes/${classId}/student`);
     return response.data;
   }
 }

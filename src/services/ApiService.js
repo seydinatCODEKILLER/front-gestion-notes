@@ -11,7 +11,7 @@ export default class ApiService {
       Accept: "application/json",
       ...config.headers,
     };
-    this.timeout = config.timeout || 20000;
+    this.timeout = config.timeout || 80000;
     this.hooks = {
       preRequest: config.preRequest || ((req) => req),
       postResponse: config.postResponse || ((res) => res),
@@ -29,6 +29,7 @@ export default class ApiService {
 
     try {
       const url = new URL(endpoint, this.baseURL);
+      console.log(url);
       const options = {
         method,
         headers: { ...this.defaultHeaders, ...headers },

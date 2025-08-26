@@ -6,37 +6,37 @@ export class TrimestreService extends AbstractService {
   }
 
   async getAllTrimestres() {
-    const response = await this.get("/api/trimestres");
+    const response = await this.get("trimestres");
     return response.data;
   }
 
   async getCurrent() {
-    const response = await this.get("/api/trimestres/current");
+    const response = await this.get("trimestres/current");
     return response.data;
   }
 
   async getTrimestre(id) {
-    const response = await this.get(`/api/trimestres/${id}`);
+    const response = await this.get(`trimestres/${id}`);
     return response.data;
   }
 
   async createTrimestre(data) {
-    const response = await this.post("/api/trimestres", data);
+    const response = await this.post("trimestres", data);
     return response.data;
   }
 
   async updateTrimestre(id, data) {
-    const response = await this.put(`/api/trimestres/${id}`, data);
+    const response = await this.put(`trimestres/${id}`, data);
     return response.data;
   }
 
   async softDeleteTrimestre(id) {
-    const response = await this.patch(`/api/trimestres/${id}/delete`);
+    const response = await this.patch(`trimestres/${id}/delete`);
     return response.data;
   }
 
   async restoreTrimestre(id) {
-    const response = await this.patch(`/api/trimestres/${id}/restore`);
+    const response = await this.patch(`trimestres/${id}/restore`);
     return response.data;
   }
 

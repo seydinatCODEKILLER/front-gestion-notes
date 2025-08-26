@@ -53,22 +53,22 @@ export class DashboardService extends AbstractService {
   }
 
   async fetchClassStats() {
-    const response = await this.get("/api/classes/stats");
+    const response = await this.get("classes/stats");
     return this.validateStats(response.data);
   }
 
   async fetchProfessorStats() {
-    const response = await this.get("/api/teachers/stats");
+    const response = await this.get("teachers/stats");
     return this.validateStats(response.data);
   }
 
   async fetchStudentStats() {
-    const response = await this.get("/api/students/stats");
+    const response = await this.get("students/stats");
     return this.validateStats(response.data);
   }
 
   async fetchAdminDashboardStats(trimestreId, anneeScolaireId) {
-    const response = await this.get("/api/statistic/global", {
+    const response = await this.get("statistic/global", {
       trimestreId: trimestreId,
       anneeScolaireId: anneeScolaireId,
     });

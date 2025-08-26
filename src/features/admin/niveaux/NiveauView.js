@@ -26,6 +26,7 @@ export class AdminNiveauView extends AbstractView {
 
   async setup() {
     try {
+      this.cleanup();
       this.container.innerHTML = "";
       this.localNiveaux = await this.controller.loadNiveaux();
       this.createBanner();
@@ -55,6 +56,7 @@ export class AdminNiveauView extends AbstractView {
       this.banner.render(),
       this.container.firstChild
     );
+
   }
 
   closeBanner() {

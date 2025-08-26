@@ -6,29 +6,29 @@ export class TeacherSubjectService extends AbstractService {
   }
 
   async getAllAssociations() {
-    const response = await this.get("/api/teacher-subjects");
+    const response = await this.get("teacher-subjects");
     return response.data;
   }
 
   async getTeacherSubjects(teacherId) {
     const response = await this.get(
-      `/api/teacher-subjects/teacher/${teacherId}`
+      `teacher-subjects/teacher/${teacherId}`
     );
     return response.data;
   }
 
   async getAssociation(id) {
-    const response = await this.get(`/api/teacher-subjects/${id}`);
+    const response = await this.get(`teacher-subjects/${id}`);
     return response.data;
   }
 
   async assignSubject(data) {
-    const response = await this.post("/api/teacher-subjects", data);
+    const response = await this.post("teacher-subjects", data);
     return response.data;
   }
 
   async removeAssignment(id) {
-    const response = await this.delete(`/api/teacher-subjects/${id}`);
+    const response = await this.delete(`teacher-subjects/${id}`);
     return response.data;
   }
 

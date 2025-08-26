@@ -6,42 +6,42 @@ export class EvaluationService extends AbstractService {
   }
 
   async getAllEvaluations() {
-    const response = await this.get("/api/evaluations");
+    const response = await this.get("evaluations");
     return response.data;
   }
 
   async getEvaluation(id) {
-    const response = await this.get(`/api/evaluations/${id}`);
+    const response = await this.get(`evaluations/${id}`);
     return response.data;
   }
 
   async getEvaluationsByClass(classId) {
-    const response = await this.get(`/api/evaluations/class/${classId}`);
+    const response = await this.get(`evaluations/class/${classId}`);
     return response.data;
   }
 
   async getEvaluationsByTeacher(teacherId) {
-    const response = await this.get(`/api/evaluations/teacher/${teacherId}`);
+    const response = await this.get(`evaluations/teacher/${teacherId}`);
     return response.data;
   }
 
   async getEvaluationStats(id) {
-    const response = await this.get(`/api/evaluations/${id}/stats`);
+    const response = await this.get(`evaluations/${id}/stats`);
     return response.data;
   }
 
   async createEvaluation(data) {
-    const response = await this.post("/api/evaluations", data);
+    const response = await this.post("evaluations", data);
     return response.data;
   }
 
   async updateEvaluation(id, data) {
-    const response = await this.put(`/api/evaluations/${id}`, data);
+    const response = await this.put(`evaluations/${id}`, data);
     return response.data;
   }
 
   async deleteEvaluation(id) {
-    const response = await this.delete(`/api/evaluations/${id}`);
+    const response = await this.delete(`evaluations/${id}`);
     return response.data;
   }
 

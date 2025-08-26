@@ -17,40 +17,40 @@ export class TeacherService extends AbstractService {
       includeSubjects: includeSubjects.toString(),
     };
 
-    const response = await this.get("/api/teachers", params);
+    const response = await this.get("teachers", params);
     return response.data;
   }
 
   async getTeacher(id) {
-    const response = await this.get(`/api/teachers/${id}`);
+    const response = await this.get(`teachers/${id}`);
     return response.data;
   }
 
   async getStats() {
-    const response = await this.get("/api/teachers/stats");
+    const response = await this.get("teachers/stats");
     return response.data;
   }
 
   async createTeacher(data) {
-    const response = await this.post("/api/teachers", data, { formData: true });
+    const response = await this.post("teachers", data, { formData: true });
     return response.data;
   }
 
   async updateTeacher(id, data) {
     console.log(id);
-    const response = await this.put(`/api/teachers/${id}`, data, {
+    const response = await this.put(`teachers/${id}`, data, {
       formData: true,
     });
     return response.data;
   }
 
   async softDeleteTeacher(id) {
-    const response = await this.patch(`/api/teachers/${id}/delete`);
+    const response = await this.patch(`teachers/${id}/delete`);
     return response.data;
   }
 
   async restoreTeacher(id) {
-    const response = await this.patch(`/api/teachers/${id}/restore`);
+    const response = await this.patch(`teachers/${id}/restore`);
     return response.data;
   }
 

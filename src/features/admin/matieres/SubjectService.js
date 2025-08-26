@@ -6,32 +6,32 @@ export class SubjectService extends AbstractService {
   }
 
   async getAllSubjects() {
-    const response = await this.get("/api/matieres");
+    const response = await this.get("matieres");
     return response.data;
   }
 
   async getSubject(id) {
-    const response = await this.get(`/api/matieres/${id}`);
+    const response = await this.get(`matieres/${id}`);
     return response.data;
   }
 
   async createSubject(data) {
-    const response = await this.post("/api/matieres", data);
+    const response = await this.post("matieres", data);
     return response.data;
   }
 
   async updateSubject(id, data) {
-    const response = await this.put(`/api/matieres/${id}`, data);
+    const response = await this.put(`matieres/${id}`, data);
     return response.data;
   }
 
   async softDeleteSubject(id) {
-    const response = await this.patch(`/api/matieres/${id}/delete`);
+    const response = await this.patch(`matieres/${id}/delete`);
     return response.data;
   }
 
   async restoreSubject(id) {
-    const response = await this.patch(`/api/matieres/${id}/restore`);
+    const response = await this.patch(`matieres/${id}/restore`);
     return response.data;
   }
 
@@ -51,7 +51,7 @@ export class SubjectService extends AbstractService {
   }
     async getSubjectsByTeacher(teacherId) {
     const response = await this.get(
-      `/api/teacher-subjects/teacher/${teacherId}`
+      `teacher-subjects/teacher/${teacherId}`
     );
     return response.data;
   }

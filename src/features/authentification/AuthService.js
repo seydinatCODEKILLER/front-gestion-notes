@@ -12,7 +12,7 @@ export class AuthService extends AbstractService {
     const { isValid, errors } = validateAuthData(credentials, LoginSchema);
     if (!isValid) throw this.createValidationError(errors);
 
-    const response = await this.post("/api/auth/login", credentials);
+    const response = await this.post("auth/login", credentials);
 
     this.persistAuthData(response.data);
     this.eventBus.publish("auth:login", response.data.user);

@@ -16,45 +16,44 @@ export class ReportCardService extends AbstractService {
     if (search) params.search = search;
     if (trimestreId) params.trimestreId = trimestreId;
 
-    const response = await this.get("/api/report-cards", params);
+    const response = await this.get("report-cards", params);
     return response.data;
   }
 
   async generateReportCard(data) {
-    const response = await this.post("/api/report-cards", data);
+    const response = await this.post("report-cards", data);
     return response.data;
   }
 
   async downloadReportCard(id) {
-  return this.request(
-    "GET",
-    `/api/report-cards/download/${id}`,
-    {},
-    {
-      headers: { Accept: "application/pdf" },
-      responseType: "blob"
-    }
-  );
-}
+    return this.request(
+      "GET",
+      `report-cards/download/${id}`,
+      {},
+      {
+        headers: { Accept: "application/pdf" },
+        responseType: "blob",
+      }
+    );
+  }
 
-async deleteReportCard(id) {
-    const response = await this.delete(`/api/report-cards/${id}`);
+  async deleteReportCard(id) {
+    const response = await this.delete(`report-cards/${id}`);
     return response.data;
   }
 
-
   async getStudentReportCards(studentId) {
-    const response = await this.get(`/api/report-cards/student/${studentId}`);
+    const response = await this.get(`report-cards/student/${studentId}`);
     return response.data;
   }
 
   async getTrimestres() {
-    const response = await this.get("/api/trimestres");
+    const response = await this.get("trimestres");
     return response.data;
   }
 
   async searchStudents(searchTerm) {
-    const response = await this.get("/api/students", {
+    const response = await this.get("students", {
       search: searchTerm,
       pageSize: 10,
     });

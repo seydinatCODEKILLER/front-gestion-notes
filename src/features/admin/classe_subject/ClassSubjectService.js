@@ -7,23 +7,23 @@ export class ClassSubjectService extends AbstractService {
 
   async getClassSubjects(classId, anneeScolaireId) {
     const response = await this.get(
-      `/api/class-subjects/class/${classId}/${anneeScolaireId}`
+      `class-subjects/class/${classId}/${anneeScolaireId}`
     );
     return response.data;
   }
 
   async assignSubject(data) {
-    const response = await this.post("/api/class-subjects", data);
+    const response = await this.post("class-subjects", data);
     return response.data;
   }
 
   async updateAssignment(id, data) {
-    const response = await this.put(`/api/class-subjects/${id}`, data);
+    const response = await this.put(`class-subjects/${id}`, data);
     return response.data;
   }
 
   async removeAssignment(id) {
-    const response = await this.delete(`/api/class-subjects/${id}`);
+    const response = await this.delete(`class-subjects/${id}`);
     return response.data;
   }
 

@@ -1,6 +1,6 @@
 import { AbstractView } from "@/app/abstract/AbstractView.js";
 import { Banner } from "@/components/banner/Banner";
-import { SubjectCard } from "@/components/card/SubjectCard.js";
+import { NormalSubjectCard } from "@/components/card/NormalSubjectCard.js";
 import { ModernTable } from "@/components/table/Table.js";
 import { FloatingActionButton } from "@/components/button/FloatingButton.js";
 import { Modal } from "@/components/modal/Modal.js";
@@ -119,7 +119,7 @@ console.log(error)
   }
 
   renderCardsView(container) {
-    const cards = new SubjectCard({
+    const cards = new NormalSubjectCard({
       data: this.localSubjects,
       itemsPerPage: 8,
       actions: {
