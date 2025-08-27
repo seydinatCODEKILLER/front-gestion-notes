@@ -75,20 +75,14 @@ export class AbstractView {
   /**
    * Nettoyage avant destruction de la vue
    */
-  async destroy() {
-    // Suppression des écouteurs d'événements
+  destroy() {
     this.eventListeners.forEach(({ element, event, handler }) => {
       element.removeEventListener(event, handler);
     });
+    this.eventListeners = [];
 
-    // Appel de la méthode de nettoyage spécifique si elle existe
-    if (typeof this.cleanup === "function") {
-      await this.cleanup();
-    }
-
-    // Suppression du contenu
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container);
+    if (this.container) {
+      this.container.innerHTML = "";
     }
   }
 

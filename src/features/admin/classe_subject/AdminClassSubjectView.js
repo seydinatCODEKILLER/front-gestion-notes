@@ -10,26 +10,35 @@ export class AdminClassSubjectView extends AbstractView {
     this.controller = app.getController("classSubjects");
     this.classes = [];
     this.anneeScolaireActive = null;
-    this.setup();
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-class-subject-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       [this.classes, this.anneeScolaireActive] = await Promise.all([
         this.controller.getAllClasses(),
         this.controller.getAnneeScolaireActive(),
       ]);
-      console.log(this.classes)
-      this.createBanner();
-      this.renderContent();
+      this._createBanner();
+      this._renderContent();
     } catch (error) {
-console.log(error)
-      // this.showError("Erreur de chargement des données");
+      console.error("Erreur de chargement des classes :", error);
+      this.app.services.notifications.show(
+        error.message ||
+          "Une erreur est survenue lors du chargement des classes",
+        "error"
+      );
     }
   }
 
-  createBanner() {
+  _createBanner() {
     const bannerConfig = {
       title: "Gestion des Affectations Classe-Matière",
       subtitle: "Affectez des matières aux classes et assignez des professeurs",
@@ -47,9 +56,11 @@ console.log(error)
     this.container.appendChild(this.banner.render());
   }
 
-  renderContent() {
-    const content = document.createElement("div");
-    content.className = "p-6";
+  _renderContent() {
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.className = "p-6";
+    this.container.appendChild(this.content);
 
     if (!this.anneeScolaireActive) {
       const warning = document.createElement("div");
@@ -58,8 +69,7 @@ console.log(error)
         <i class="ri-alert-line"></i>
         <span>Aucune année scolaire active. Veuillez d'abord activer une année scolaire.</span>
       `;
-      content.appendChild(warning);
-      this.container.appendChild(content);
+      this.content.appendChild(warning);
       return;
     }
 
@@ -68,39 +78,35 @@ console.log(error)
       columns: [
         {
           header: "Classe",
-          key: "nom",
-          sortable: true,
-          render: (item) => {
+          render: (c) => {
             const span = document.createElement("span");
-            span.textContent = item.nom || "N/A";
+            span.textContent = c.nom || "N/A";
             return span;
           },
+          sortable: true,
         },
         {
           header: "Niveau",
-          key: "niveau.libelle",
-          sortable: true,
-          render: (item) => {
+          render: (c) => {
             const span = document.createElement("span");
-            span.textContent = item.niveau?.libelle || "N/A";
+            span.textContent = c.niveau?.libelle || "N/A";
             return span;
           },
+          sortable: true,
         },
         {
           header: "Effectif",
-          key: "_count.students",
-          render: (item) => {
+          render: (c) => {
             const span = document.createElement("span");
-            span.textContent = item._count.students || "0";
+            span.textContent = c._count?.students || "0";
             return span;
           },
         },
         {
           header: "Capacité",
-          key: "capacite_max",
-          render: (item) => {
+          render: (c) => {
             const span = document.createElement("span");
-            span.textContent = item.capacite_max || "0";
+            span.textContent = c.capacite_max || "0";
             return span;
           },
         },
@@ -124,41 +130,34 @@ console.log(error)
         ],
       },
       onAction: (action, id, actionType) =>
-        this.handleClassAction(action, id, actionType),
+        this._handleClassAction(action, id, actionType),
     });
 
-    content.appendChild(table.render());
-    this.container.appendChild(content);
-    setTimeout(() => {
-      table.update(this.classes, 1);
-    }, 0);
+    this.content.appendChild(table.render());
+    table.update(this.classes, 1);
   }
 
-  async handleClassAction(action, classId, actionType) {
-    const classe = this.findClassById(classId);
+  async _handleClassAction(action, classId, actionType) {
+    const classe = this.classes.find((c) => c.id == classId);
     if (!classe) return;
 
     try {
       switch (action) {
         case "viewDetails":
-          await this.handleViewDetails(classe);
+          await this._viewDetails(classe);
           break;
         case "assignSubjects":
-          await this.handleAssignSubjects(classe);
+          await this._assignSubjects(classe);
           break;
         default:
           console.warn(`Action non gérée: ${action}`);
       }
     } catch (error) {
-      this.handleActionError(error);
+      this._handleActionError(error);
     }
   }
 
-  findClassById(id) {
-    return this.classes.find((c) => c.id == id);
-  }
-
-  async handleViewDetails(classe) {
+  async _viewDetails(classe) {
     const modal = new ClassDetailsModal(
       this.app,
       classe,
@@ -167,29 +166,33 @@ console.log(error)
     await modal.open();
   }
 
-  async handleAssignSubjects(classe) {
+  async _assignSubjects(classe) {
     const modal = new AssignClassSubjectsModal(
       this.app,
       classe,
       this.anneeScolaireActive,
       {
-        onSave: async () => {
-          this.app.eventBus.publish("class-subjects:updated");
-        },
+        onSave: () => this.app.eventBus.publish("class-subjects:updated"),
       }
     );
     await modal.open();
   }
 
-  handleActionError(error) {
-    console.error("Erreur lors de la gestion de l'action:", error);
+  _handleActionError(error) {
+    console.error("Erreur lors de la gestion de l'action :", error);
     this.app.services.notifications.show(
       error.message || "Une erreur est survenue",
       "error"
     );
   }
 
-  cleanup() {
-    // Cleanup si nécessaire
+  beforeDestroy() {
+    this.banner?.close();
+    this.content?.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 }

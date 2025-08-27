@@ -15,38 +15,48 @@ export class AdminSubjectView extends AbstractView {
     this.localSubjects = [];
 
     this.formModal = new SubjectFormModal(app, this.localSubjects, {
-      onSave: async () => {
-        this.localSubjects = await this.controller.loadSubjects(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshSubjects(),
     });
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-subject-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       this.localSubjects = await this.controller.loadSubjects();
-      console.log(this.localSubjects);
       this.createBanner();
       this.renderViewToggle();
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-console.log(error)
-      // this.showError("Erreur de chargement des matières");
+      console.error("Erreur de chargement des matières:", error);
+      this.handleActionError(error);
     }
+  }
+
+  async _refreshSubjects() {
+    this.localSubjects = await this.controller.loadSubjects(true);
+    this.renderContent();
   }
 
   createBanner() {
     const activeSubjects = this.localSubjects.filter(
       (s) => s.statut === "actif"
     );
-
     const bannerConfig = {
       title: "Gestion des matières",
       subtitle: "Ajoutez, modifiez et activez/désactivez vos matières",
       primaryText: `${this.localSubjects.length} matière(s) enregistrée(s)`,
-      secondaryText: `${activeSubjects.length} matière(s) active(s)`,
+      secondaryText:
+        activeSubjects.length > 0
+          ? `${activeSubjects.length} matière(s) active(s)`
+          : "Aucune matière active",
       icon: '<i class="ri-book-line text-2xl text-blue-600"></i>',
       variant: "default",
       closable: true,
@@ -54,33 +64,15 @@ console.log(error)
     };
 
     this.banner = new Banner(bannerConfig);
-    this.container.insertBefore(
-      this.banner.render(),
-      this.container.firstChild
-    );
-  }
-
-  closeBanner() {
-    this.banner?.close();
-  }
-
-  switchView(viewType) {
-    if (this.currentView !== viewType) {
-      this.currentView = viewType;
-
-      Object.entries(this.viewButtons).forEach(([type, button]) => {
-        button.className = this.getToggleButtonClass(type);
-      });
-      this.renderContent();
-    }
+    this.container.appendChild(this.banner.render());
   }
 
   renderViewToggle() {
     this.viewButtons = {};
-
-    const toggleGroup = document.createElement("div");
-    toggleGroup.className =
+    this.toggleGroup = document.createElement("div");
+    this.toggleGroup.className =
       "view-toggle-group flex rounded-lg mb-6 overflow-hidden px-3 mt-4";
+    this.container.appendChild(this.toggleGroup);
 
     ["cards", "table"].forEach((viewType) => {
       const button = document.createElement("button");
@@ -89,33 +81,30 @@ console.log(error)
         viewType === "cards"
           ? '<i class="ri-grid-fill mr-2"></i>Cartes'
           : '<i class="ri-table-fill mr-2"></i>Tableau';
-
       this.viewButtons[viewType] = button;
-
       button.addEventListener("click", () => this.switchView(viewType));
-      toggleGroup.appendChild(button);
+      this.toggleGroup.appendChild(button);
     });
+  }
 
-    this.container.appendChild(toggleGroup);
+  switchView(viewType) {
+    if (this.currentView !== viewType) {
+      this.currentView = viewType;
+      Object.entries(this.viewButtons).forEach(([type, button]) => {
+        button.className = this.getToggleButtonClass(type);
+      });
+      this.renderContent();
+    }
   }
 
   renderContent() {
-    const content =
-      this.container.querySelector("#content-container") ||
-      document.createElement("div");
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.id = "content-container";
+    this.container.appendChild(this.content);
 
-    content.id = "content-container";
-    content.innerHTML = "";
-
-    if (this.currentView === "cards") {
-      this.renderCardsView(content);
-    } else {
-      this.renderTableView(content);
-    }
-
-    if (!this.container.querySelector("#content-container")) {
-      this.container.appendChild(content);
-    }
+    if (this.currentView === "cards") this.renderCardsView(this.content);
+    else this.renderTableView(this.content);
   }
 
   renderCardsView(container) {
@@ -150,48 +139,20 @@ console.log(error)
   }
 
   renderTableView(container) {
+    const isActive = (s) => s.statut === "actif";
     const table = new ModernTable({
       itemsPerPage: 10,
       columns: [
-        {
-          header: "Nom",
-          key: "nom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.nom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Niveau",
-          key: "niveau.nom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.niveau?.nom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Coefficient",
-          key: "coefficient",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.coefficient || "N/A";
-            return span;
-          },
-        },
+        { header: "Nom", render: (item) => item.nom || "N/A" },
+        { header: "Niveau", render: (item) => item.niveau?.nom || "N/A" },
+        { header: "Coefficient", render: (item) => item.coefficient || "N/A" },
         {
           header: "Statut",
-          key: "statut",
           render: (item) => {
             const badge = document.createElement("span");
             badge.className =
-              "badge " +
-              (item.statut === "actif" ? "badge-success" : "badge-warning");
-            badge.textContent = item.statut === "actif" ? "Actif" : "Inactif";
+              "badge " + (isActive(item) ? "badge-success" : "badge-warning");
+            badge.textContent = isActive(item) ? "Actif" : "Inactif";
             return badge;
           },
         },
@@ -204,15 +165,13 @@ console.log(error)
             name: "edit",
             icon: "ri-edit-line",
             className: "btn-primary",
-            visible: (item) => item.statut === "actif",
+            visible: isActive,
           },
           {
             name: "toggleStatus",
-            icon: (item) =>
-              item.statut === "actif" ? "ri-close-line" : "ri-check-line",
-            className: (item) =>
-              item.statut === "actif" ? "btn-error" : "btn-success",
-            action: (item) => (item.statut === "actif" ? "disable" : "enable"),
+            icon: (s) => (isActive(s) ? "ri-close-line" : "ri-check-line"),
+            className: (s) => (isActive(s) ? "btn-error" : "btn-success"),
+            action: (s) => (isActive(s) ? "disable" : "enable"),
           },
         ],
       },
@@ -221,9 +180,7 @@ console.log(error)
     });
 
     container.appendChild(table.render());
-    setTimeout(() => {
-      table.update(this.localSubjects, 1);
-    }, 0);
+    table.update(this.localSubjects, 1);
   }
 
   initFloatingButton() {
@@ -232,63 +189,42 @@ console.log(error)
       color: "primary",
       position: "bottom-right",
       size: "lg",
-      onClick: () => {
-        this.formModal.open();
-      },
+      onClick: () => this.formModal.open(),
     });
   }
 
   async handleSubjectAction(action, id, actionType) {
-    const subject = this.findSubjectById(id);
+    const subject = this.localSubjects.find((s) => s.id == id);
     if (!subject) return;
+
     try {
-      switch (action) {
-        case "edit":
-          await this.handleEditAction(subject);
-          break;
-        case "toggleStatus":
-          await this.handleStatusToggle(id, actionType);
-          break;
-        default:
-          console.warn(`Action non gérée: ${action}`);
-      }
+      if (action === "edit") await this.handleEditAction(subject);
+      else if (action === "toggleStatus")
+        await this.handleStatusToggle(id, actionType);
+      else console.warn(`Action non gérée: ${action}`);
     } catch (error) {
       this.handleActionError(error);
     }
   }
 
-  findSubjectById(id) {
-    return this.localSubjects.find((s) => s.id == id);
-  }
-
   async handleEditAction(subject) {
     const modal = new SubjectEditModal(this.app, subject, {
-      onSave: async () => {
-        this.localSubjects = await this.controller.loadSubjects(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshSubjects(),
     });
     await modal.open();
   }
 
   async handleStatusToggle(id, actionType) {
-    const isDisableAction = actionType === "disable";
+    const isDisable = actionType === "disable";
     const confirmed = await this.showConfirmation(
-      isDisableAction ? "Désactiver cette matière ?" : "Activer cette matière ?"
+      isDisable ? "Désactiver cette matière ?" : "Activer cette matière ?"
     );
-
     if (!confirmed) return;
 
     try {
-      if (isDisableAction) {
-        await this.controller.deleteSubject(id);
-      } else {
-        await this.controller.restoreSubject(id);
-      }
-
-      // Recharger les données
-      this.localSubjects = await this.controller.loadSubjects(true);
-      this.renderContent();
+      if (isDisable) await this.controller.deleteSubject(id);
+      else await this.controller.restoreSubject(id);
+      await this._refreshSubjects();
     } catch (error) {
       this.handleActionError(error);
     }
@@ -315,9 +251,17 @@ console.log(error)
     });
   }
 
-  cleanup() {
-    if (this.fab) this.fab.destroy();
-    if (this.formModal) this.formModal.close();
+  beforeDestroy() {
+    this.fab?.remove?.();
+    this.formModal?.close();
+    this.banner?.close();
+    if (this.content) this.content.remove();
+    if (this.toggleGroup) this.toggleGroup.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 
   getToggleButtonClass(viewType) {

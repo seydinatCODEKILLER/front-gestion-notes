@@ -42,6 +42,19 @@ export class TeacherSubjectController {
     }
   }
 
+  async getTeacherSubjectsClasse(teacherId) {
+    try {
+      return await this.service.getTeacherSubjectsClasse(teacherId);
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Erreur lors du chargement des matières du professeur";
+      this.app.services.notifications.show(errorMessage, "error");
+      throw error;
+    }
+  }
+
   async assignSubject(data) {
     try {
       const result = await this.service.assignSubject(data);

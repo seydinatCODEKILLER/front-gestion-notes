@@ -32,7 +32,7 @@ export class GradeService extends AbstractService {
 
   async getEvaluationGrades(evaluationId) {
     try {
-      const allGrades = await this.getClassGrades(classId); // On adaptera selon l'implémentation backend
+      const allGrades = await this.getClassGrades(classId);
       return allGrades.filter((grade) => grade.evaluationId === evaluationId);
     } catch (error) {
       console.error(

@@ -15,26 +15,34 @@ export class AdminStudentView extends AbstractView {
     this.localStudents = [];
 
     this.formModal = new StudentFormModal(app, this.localStudents, {
-      onSave: async () => {
-        this.localStudents = await this.controller.loadStudents(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshStudents(),
     });
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-student-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       this.localStudents = await this.controller.loadStudents();
-      console.log(this.localStudents);
       this.createBanner();
       this.renderViewToggle();
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-console.log(error)
-      // this.showError("Erreur de chargement des élèves");
+      console.error("Erreur de chargement des élèves:", error);
+      this.handleActionError(error);
     }
+  }
+
+  async _refreshStudents() {
+    this.localStudents = await this.controller.loadStudents(true);
+    this.renderContent();
   }
 
   createBanner() {
@@ -46,7 +54,10 @@ console.log(error)
       title: "Gestion des élèves",
       subtitle: "Ajoutez, modifiez et activez/désactivez vos élèves",
       primaryText: `${this.localStudents.length} élève(s) enregistré(s)`,
-      secondaryText: `${activeStudents.length} élève(s) actif(s)`,
+      secondaryText:
+        activeStudents.length > 0
+          ? `${activeStudents.length} élève(s) actif(s)`
+          : "Aucun élève actif",
       icon: '<i class="ri-user-line text-2xl text-green-600"></i>',
       variant: "default",
       closable: true,
@@ -54,33 +65,15 @@ console.log(error)
     };
 
     this.banner = new Banner(bannerConfig);
-    this.container.insertBefore(
-      this.banner.render(),
-      this.container.firstChild
-    );
-  }
-
-  closeBanner() {
-    this.banner?.close();
-  }
-
-  switchView(viewType) {
-    if (this.currentView !== viewType) {
-      this.currentView = viewType;
-
-      Object.entries(this.viewButtons).forEach(([type, button]) => {
-        button.className = this.getToggleButtonClass(type);
-      });
-      this.renderContent();
-    }
+    this.container.appendChild(this.banner.render());
   }
 
   renderViewToggle() {
     this.viewButtons = {};
-
-    const toggleGroup = document.createElement("div");
-    toggleGroup.className =
+    this.toggleGroup = document.createElement("div");
+    this.toggleGroup.className =
       "view-toggle-group flex rounded-lg mb-6 overflow-hidden px-3 mt-4";
+    this.container.appendChild(this.toggleGroup);
 
     ["cards", "table"].forEach((viewType) => {
       const button = document.createElement("button");
@@ -91,30 +84,31 @@ console.log(error)
           : '<i class="ri-table-fill mr-2"></i>Tableau';
 
       this.viewButtons[viewType] = button;
-
       button.addEventListener("click", () => this.switchView(viewType));
-      toggleGroup.appendChild(button);
+      this.toggleGroup.appendChild(button);
     });
+  }
 
-    this.container.appendChild(toggleGroup);
+  switchView(viewType) {
+    if (this.currentView !== viewType) {
+      this.currentView = viewType;
+      Object.entries(this.viewButtons).forEach(([type, button]) => {
+        button.className = this.getToggleButtonClass(type);
+      });
+      this.renderContent();
+    }
   }
 
   renderContent() {
-    const content =
-      this.container.querySelector("#content-container") ||
-      document.createElement("div");
-
-    content.id = "content-container";
-    content.innerHTML = "";
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.id = "content-container";
+    this.container.appendChild(this.content);
 
     if (this.currentView === "cards") {
-      this.renderCardsView(content);
+      this.renderCardsView(this.content);
     } else {
-      this.renderTableView(content);
-    }
-
-    if (!this.container.querySelector("#content-container")) {
-      this.container.appendChild(content);
+      this.renderTableView(this.content);
     }
   }
 
@@ -151,83 +145,41 @@ console.log(error)
   }
 
   renderTableView(container) {
+    const isActive = (s) => s.user?.statut === "actif";
+
     const table = new ModernTable({
       itemsPerPage: 10,
       columns: [
-        {
-          header: "Nom",
-          key: "user.nom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.nom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Prénom",
-          key: "user.prenom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.prenom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Email",
-          key: "user.email",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.email || "N/A";
-            return span;
-          },
-        },
+        { header: "Nom", render: (item) => item.user?.nom || "N/A" },
+        { header: "Prénom", render: (item) => item.user?.prenom || "N/A" },
+        { header: "Email", render: (item) => item.user?.email || "N/A" },
         {
           header: "Classe",
-          key: "class.nom",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.class?.nom || "Non affecté";
-            return span;
-          },
+          render: (item) => item.class?.nom || "Non affecté",
         },
         {
           header: "Âge",
-          key: "date_naissance",
           render: (item) => {
-            const span = document.createElement("span");
-            if (item.date_naissance) {
-              const birthDate = new Date(item.date_naissance);
-              const today = new Date();
-              let age = today.getFullYear() - birthDate.getFullYear();
-              const monthDiff = today.getMonth() - birthDate.getMonth();
-
-              if (
-                monthDiff < 0 ||
-                (monthDiff === 0 && today.getDate() < birthDate.getDate())
-              ) {
-                age--;
-              }
-              span.textContent = `${age} ans`;
-            } else {
-              span.textContent = "N/A";
-            }
-            return span;
+            if (!item.date_naissance) return document.createTextNode("N/A");
+            const birth = new Date(item.date_naissance);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            if (
+              today.getMonth() < birth.getMonth() ||
+              (today.getMonth() === birth.getMonth() &&
+                today.getDate() < birth.getDate())
+            )
+              age--;
+            return document.createTextNode(`${age} ans`);
           },
         },
         {
           header: "Statut",
-          key: "user.statut",
           render: (item) => {
             const badge = document.createElement("span");
             badge.className =
-              "badge " +
-              (item.user?.statut === "actif"
-                ? "badge-success"
-                : "badge-warning");
-            badge.textContent =
-              item.user?.statut === "actif" ? "Actif" : "Inactif";
+              "badge " + (isActive(item) ? "badge-success" : "badge-warning");
+            badge.textContent = isActive(item) ? "Actif" : "Inactif";
             return badge;
           },
         },
@@ -240,16 +192,13 @@ console.log(error)
             name: "edit",
             icon: "ri-edit-line",
             className: "btn-primary",
-            visible: (item) => item.user?.statut === "actif",
+            visible: isActive,
           },
           {
             name: "toggleStatus",
-            icon: (item) =>
-              item.user?.statut === "actif" ? "ri-close-line" : "ri-check-line",
-            className: (item) =>
-              item.user?.statut === "actif" ? "btn-error" : "btn-success",
-            action: (item) =>
-              item.user?.statut === "actif" ? "disable" : "enable",
+            icon: (s) => (isActive(s) ? "ri-close-line" : "ri-check-line"),
+            className: (s) => (isActive(s) ? "btn-error" : "btn-success"),
+            action: (s) => (isActive(s) ? "disable" : "enable"),
           },
         ],
       },
@@ -258,9 +207,7 @@ console.log(error)
     });
 
     container.appendChild(table.render());
-    setTimeout(() => {
-      table.update(this.localStudents, 1);
-    }, 0);
+    table.update(this.localStudents, 1);
   }
 
   initFloatingButton() {
@@ -269,63 +216,43 @@ console.log(error)
       color: "primary",
       position: "bottom-right",
       size: "lg",
-      onClick: () => {
-        this.formModal.open();
-      },
+      onClick: () => this.formModal.open(),
     });
   }
 
   async handleStudentAction(action, id, actionType) {
-    const student = this.findStudentById(id);
+    const student = this.localStudents.find((s) => s.id == id);
     if (!student) return;
+
     try {
-      switch (action) {
-        case "edit":
-          await this.handleEditAction(student);
-          break;
-        case "toggleStatus":
-          await this.handleStatusToggle(id, actionType);
-          break;
-        default:
-          console.warn(`Action non gérée: ${action}`);
-      }
+      if (action === "edit") await this.handleEditAction(student);
+      else if (action === "toggleStatus")
+        await this.handleStatusToggle(id, actionType);
+      else console.warn(`Action non gérée: ${action}`);
     } catch (error) {
       this.handleActionError(error);
     }
   }
 
-  findStudentById(id) {
-    return this.localStudents.find((s) => s.id == id);
-  }
-
   async handleEditAction(student) {
     const modal = new StudentEditModal(this.app, student, {
-      onSave: async () => {
-        this.localStudents = await this.controller.loadStudents(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshStudents(),
     });
     await modal.open();
   }
 
   async handleStatusToggle(id, actionType) {
-    const isDisableAction = actionType === "disable";
+    const isDisable = actionType === "disable";
     const confirmed = await this.showConfirmation(
-      isDisableAction ? "Désactiver cet élève ?" : "Activer cet élève ?"
+      isDisable ? "Désactiver cet élève ?" : "Activer cet élève ?"
     );
-
     if (!confirmed) return;
 
     try {
-      if (isDisableAction) {
-        await this.controller.deleteStudent(id);
-      } else {
-        await this.controller.restoreStudent(id);
-      }
+      if (isDisable) await this.controller.deleteStudent(id);
+      else await this.controller.restoreStudent(id);
 
-      // Recharger les données
-      this.localStudents = await this.controller.loadStudents(true);
-      this.renderContent();
+      await this._refreshStudents();
     } catch (error) {
       this.handleActionError(error);
     }
@@ -352,9 +279,17 @@ console.log(error)
     });
   }
 
-  cleanup() {
-    if (this.fab) this.fab.destroy();
-    if (this.formModal) this.formModal.close();
+  beforeDestroy() {
+    this.fab?.remove?.();
+    this.formModal?.close();
+    this.banner?.close();
+    if (this.content) this.content.remove();
+    if (this.toggleGroup) this.toggleGroup.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 
   getToggleButtonClass(viewType) {

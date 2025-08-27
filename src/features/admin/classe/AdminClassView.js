@@ -15,25 +15,34 @@ export class AdminClassView extends AbstractView {
     this.localClasses = [];
 
     this.formModal = new ClassFormModal(app, this.localClasses, {
-      onSave: async () => {
-        this.localClasses = await this.controller.loadClasses(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshClasses(),
     });
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-class-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       this.localClasses = await this.controller.loadClasses();
       this.createBanner();
       this.renderViewToggle();
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      console.log(error)
-      // this.showError("Erreur de chargement des classes");
+      console.error("Erreur lors du chargement des classes:", error);
+      this.handleActionError(error);
     }
+  }
+
+  async _refreshClasses() {
+    this.localClasses = await this.controller.loadClasses(true);
+    this.renderContent();
   }
 
   createBanner() {
@@ -43,41 +52,26 @@ export class AdminClassView extends AbstractView {
       title: "Gestion des classes",
       subtitle: "Ajoutez, modifiez et activez/désactivez vos classes",
       primaryText: `${this.localClasses.length} classe(s) enregistrée(s)`,
-      secondaryText: `${activeClasses.length} classe(s) active(s)`,
-      icon: '<i class="ri-door-line text-2xl text-green-600"></i>',
-      variant: "success",
+      secondaryText:
+        activeClasses.length > 0
+          ? `${activeClasses.length} classe(s) active(s)`
+          : "Aucune classe active",
+      icon: '<i class="ri-group-line text-2xl text-green-600"></i>',
+      variant: "default",
       closable: true,
       timer: null,
     };
 
     this.banner = new Banner(bannerConfig);
-    this.container.insertBefore(
-      this.banner.render(),
-      this.container.firstChild
-    );
-  }
-
-  closeBanner() {
-    this.banner?.close();
-  }
-
-  switchView(viewType) {
-    if (this.currentView !== viewType) {
-      this.currentView = viewType;
-
-      Object.entries(this.viewButtons).forEach(([type, button]) => {
-        button.className = this.getToggleButtonClass(type);
-      });
-      this.renderContent();
-    }
+    this.container.appendChild(this.banner.render());
   }
 
   renderViewToggle() {
     this.viewButtons = {};
-
-    const toggleGroup = document.createElement("div");
-    toggleGroup.className =
+    this.toggleGroup = document.createElement("div");
+    this.toggleGroup.className =
       "view-toggle-group flex rounded-lg mb-6 overflow-hidden px-3 mt-4";
+    this.container.appendChild(this.toggleGroup);
 
     ["cards", "table"].forEach((viewType) => {
       const button = document.createElement("button");
@@ -88,34 +82,36 @@ export class AdminClassView extends AbstractView {
           : '<i class="ri-table-fill mr-2"></i>Tableau';
 
       this.viewButtons[viewType] = button;
-
       button.addEventListener("click", () => this.switchView(viewType));
-      toggleGroup.appendChild(button);
+      this.toggleGroup.appendChild(button);
     });
+  }
 
-    this.container.appendChild(toggleGroup);
+  switchView(viewType) {
+    if (this.currentView !== viewType) {
+      this.currentView = viewType;
+      Object.entries(this.viewButtons).forEach(([type, button]) => {
+        button.className = this.getToggleButtonClass(type);
+      });
+      this.renderContent();
+    }
   }
 
   renderContent() {
-    const content =
-      this.container.querySelector("#content-container") ||
-      document.createElement("div");
-
-    content.id = "content-container";
-    content.innerHTML = "";
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.id = "content-container";
+    this.container.appendChild(this.content);
 
     if (this.currentView === "cards") {
-      this.renderCardsView(content);
+      this.renderCardsView(this.content);
     } else {
-      this.renderTableView(content);
-    }
-
-    if (!this.container.querySelector("#content-container")) {
-      this.container.appendChild(content);
+      this.renderTableView(this.content);
     }
   }
 
   renderCardsView(container) {
+    const cardsWrapper = document.createElement("div");
     const cards = new ClassCard({
       itemsPerPage: 8,
       data: this.localClasses,
@@ -143,58 +139,29 @@ export class AdminClassView extends AbstractView {
         this.handleClassAction(action, id, actionType),
     });
 
-    container.appendChild(cards.render());
+    cardsWrapper.appendChild(cards.render());
+    container.appendChild(cardsWrapper);
   }
 
   renderTableView(container) {
+    const tableWrapper = document.createElement("div");
     const table = new ModernTable({
       itemsPerPage: 10,
       columns: [
-        {
-          header: "Nom",
-          key: "nom",
-          sortable: true,
-        },
+        { header: "Libellé", key: "libelle", sortable: true },
         {
           header: "Niveau",
           key: "niveau.libelle",
           sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.niveau?.libelle || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Année scolaire",
-          key: "annee_scolaire.libelle",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.anneeScolaire?.libelle || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Capacité",
-          key: "capacite_max",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.capacite_max || "∞";
-            return span;
-          },
+          render: (item) => item.niveau?.libelle || "N/A",
         },
         {
           header: "Statut",
           key: "statut",
-          render: (item) => {
-            const badge = document.createElement("span");
-            badge.className =
-              "badge " +
-              (item.statut === "actif" ? "badge-success" : "badge-warning");
-            badge.textContent = item.statut === "actif" ? "Actif" : "Inactif";
-            return badge;
-          },
+          render: (item) =>
+            `<span class="badge badge-${
+              item.statut === "actif" ? "success" : "warning"
+            }">${item.statut === "actif" ? "Actif" : "Inactif"}</span>`,
         },
       ],
       data: this.localClasses,
@@ -221,8 +188,9 @@ export class AdminClassView extends AbstractView {
         this.handleClassAction(action, id, actionType),
     });
 
-    container.appendChild(table.render());
-      table.update(this.localClasses, 1);
+    tableWrapper.appendChild(table.render());
+    container.appendChild(tableWrapper);
+    table.update(this.localClasses, 1);
   }
 
   initFloatingButton() {
@@ -231,63 +199,42 @@ export class AdminClassView extends AbstractView {
       color: "primary",
       position: "bottom-right",
       size: "lg",
-      onClick: () => {
-        this.formModal.open();
-      },
+      onClick: () => this.formModal.open(),
     });
   }
 
   async handleClassAction(action, id, actionType) {
-    const classe = this.findClassById(id);
-    if (!classe) return;
+    const cls = this.localClasses.find((c) => c.id == id);
+    if (!cls) return;
+
     try {
-      switch (action) {
-        case "edit":
-          await this.handleEditAction(classe);
-          break;
-        case "toggleStatus":
-          await this.handleStatusToggle(id, actionType);
-          break;
-        default:
-          console.warn(`Action non gérée: ${action}`);
-      }
+      if (action === "edit") await this.handleEditAction(cls);
+      else if (action === "toggleStatus") await this.handleStatusToggle(id, actionType);
+      else console.warn(`Action non gérée: ${action}`);
     } catch (error) {
       this.handleActionError(error);
     }
   }
 
-  findClassById(id) {
-    return this.localClasses.find((c) => c.id == id);
-  }
-
-  async handleEditAction(classe) {
-    const modal = new ClassEditModal(this.app, classe, {
-      onSave: async () => {
-        this.localClasses = await this.controller.loadClasses(true);
-        this.renderContent();
-      },
+  async handleEditAction(cls) {
+    const modal = new ClassEditModal(this.app, cls, {
+      onSave: async () => await this._refreshClasses(),
     });
     await modal.open();
   }
 
   async handleStatusToggle(id, actionType) {
-    const isDisableAction = actionType === "disable";
+    const isDisable = actionType === "disable";
     const confirmed = await this.showConfirmation(
-      isDisableAction ? "Désactiver cette classe ?" : "Activer cette classe ?"
+      isDisable ? "Désactiver cette classe ?" : "Activer cette classe ?"
     );
-
     if (!confirmed) return;
 
     try {
-      if (isDisableAction) {
-        await this.controller.deleteClass(id);
-      } else {
-        await this.controller.restoreClass(id);
-      }
+      if (isDisable) await this.controller.deleteClass(id);
+      else await this.controller.restoreClass(id);
 
-      // Recharger les données
-      this.localClasses = await this.controller.loadClasses(true);
-      this.renderContent();
+      await this._refreshClasses();
     } catch (error) {
       this.handleActionError(error);
     }
@@ -314,16 +261,24 @@ export class AdminClassView extends AbstractView {
     });
   }
 
-  cleanup() {
-    if (this.fab) this.fab.destroy();
-    if (this.formModal) this.formModal.close();
-  }
-
   getToggleButtonClass(viewType) {
     return `px-4 py-2 transition duration-150 ${
       this.currentView === viewType
         ? "bg-primary text-white"
         : "bg-white hover:bg-base-200"
     }`;
+  }
+
+  beforeDestroy() {
+    this.fab?.remove?.();
+    this.formModal?.close();
+    if (this.banner) this.banner.close();
+    if (this.content) this.content.remove();
+    if (this.toggleGroup) this.toggleGroup.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 }

@@ -39,8 +39,8 @@ export class SubjectService extends AbstractService {
     try {
       const subjects = await this.getAllSubjects();
       return subjects.some(
-        (s) => 
-          s.nom.toLowerCase() === nom.toLowerCase() && 
+        (s) =>
+          s.nom.toLowerCase() === nom.toLowerCase() &&
           s.niveauId == niveauId &&
           (!excludeId || s.id !== excludeId)
       );
@@ -49,10 +49,13 @@ export class SubjectService extends AbstractService {
       return false;
     }
   }
-    async getSubjectsByTeacher(teacherId) {
-    const response = await this.get(
-      `teacher-subjects/teacher/${teacherId}`
-    );
+  async getSubjectsByTeacher(teacherId) {
+    const response = await this.get(`teacher-subjects/teacher/${teacherId}`);
+    return response.data;
+  }
+
+  async getSubjectsByTeacherClass(teacherId) {
+    const response = await this.get(`teacher-subjects/teacherClass/${teacherId}`);
     return response.data;
   }
 }

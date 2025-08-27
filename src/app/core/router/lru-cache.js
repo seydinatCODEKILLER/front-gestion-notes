@@ -1,37 +1,27 @@
 export class LRUCache {
-  constructor(maxSize = 10) {
-    this.maxSize = maxSize;
+  constructor(limit = 50) {
     this.cache = new Map();
+    this.limit = limit;
   }
 
   get(key) {
-    if (!this.cache.has(key)) return undefined;
-
-    const value = this.cache.get(key);
-    // Rafraîchir l'ordre
-    this.cache.delete(key);
-    this.cache.set(key, value);
-    return value;
+    const item = this.cache.get(key);
+    if (item) {
+      this.cache.delete(key);
+      this.cache.set(key, item);
+    }
+    return item;
   }
 
   set(key, value) {
     if (this.cache.has(key)) {
       this.cache.delete(key);
-    } else if (this.cache.size >= this.maxSize) {
-      // Supprimer le moins récemment utilisé
+    } else if (this.cache.size >= this.limit) {
+      // supprime l’élément le plus ancien
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
     }
     this.cache.set(key, value);
-  }
-
-  prune(expiryMinutes = 30) {
-    const now = Date.now();
-    for (const [key, { timestamp }] of this.cache.entries()) {
-      if (now - timestamp > expiryMinutes * 60000) {
-        this.delete(key);
-      }
-    }
   }
 
   has(key) {
@@ -46,7 +36,15 @@ export class LRUCache {
     this.cache.clear();
   }
 
-  get size() {
-    return this.cache.size;
+  keys() {
+    return this.cache.keys();
+  }
+
+  values() {
+    return this.cache.values(); // ✅ corrige ton problème
+  }
+
+  entries() {
+    return this.cache.entries();
   }
 }

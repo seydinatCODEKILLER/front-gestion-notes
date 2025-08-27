@@ -10,7 +10,7 @@ export class Router {
     this.routes = [];
     this.layouts = new Map();
 
-    this.viewCache = new LRUCache(config.cacheSize || 20);
+    this.viewCache = new LRUCache(config.cacheSize || 10);
     this.layoutCache = new LRUCache(5);
     this.scrollManager = new ScrollManager();
     this.suspenseManager = new SuspenseManager();
@@ -118,7 +118,7 @@ export class Router {
   async handleNavigation() {
     const { path, queryParams, hash } = this.getCurrentPathDetails();
     console.log(path);
-    
+
     const matched = matchRoute(path, this.routes);
 
     if (!matched) return this.handleNotFound();
@@ -136,7 +136,7 @@ export class Router {
     await this.transitionAnimator.startTransition();
 
     try {
-      // Lazy load
+      // Lazy load de la vue si nécessaire
       if (route._component && !route.component) {
         this.suspenseManager.showLoader();
         route.component = (await route._component()).default;
@@ -144,47 +144,51 @@ export class Router {
 
       // Layout
       const layout = await this.getLayout(route.layout);
+
+      // Si le layout change, on détruit l'ancien
       if (this.current.layout !== layout) {
         await this.destroyCurrentLayout();
         this.current.layout = layout;
         await layout.setup();
       }
 
-      // Vue
+      // Vue : détruire l'ancienne avant de créer/rendre la nouvelle
+      await this.destroyCurrentView();
+
       const view = await this.getViewWithExpiry(route, params);
 
-      // Middlewares
+      // Middlewares avant rendu
       await this.runMiddlewares(route, "beforeResolve", view);
 
-      // Scroll
+      // Sauvegarder scroll
       this.scrollManager.saveScrollPosition(this.current.route?.path);
 
-      // Render
+      // Rendu
       this.suspenseManager.showLoader();
       await this.current.layout.beforeRender?.(view);
       await view.render();
       await this.current.layout.renderView(view);
 
-      // Nested routes
+      // Routes imbriquées
       if (route.meta?.parentRoute) {
         await this.handleNestedRoute(route, params, view);
       }
 
-      // Active links
+      // Liens actifs
       this.updateActiveState(route.path);
 
       // Metadata
       this.updatePageMetadata(view, route);
 
-      // Update state
+      // Mettre à jour l'état actuel
       this.current.route = route;
       this.current.view = view;
       this.current.params = params;
 
-      // Scroll restore
+      // Restaurer scroll
       this.scrollManager.restoreScrollPosition(route.path);
 
-      // Animation
+      // Animation de transition
       await this.transitionAnimator.animateViewTransition(
         this.current.view?.element,
         view.element
@@ -306,8 +310,20 @@ export class Router {
   async destroyCurrentView() {
     if (this.current.view) {
       await this.current.view.beforeDestroy?.();
-      if (![...this.viewCache.values()].includes(this.current.view))
+
+      // Vérifie si la vue est encore en cache
+      let isCached = false;
+      for (const { view } of this.viewCache.values()) {
+        if (view === this.current.view) {
+          isCached = true;
+          break;
+        }
+      }
+
+      if (!isCached) {
         this.current.view.destroy?.();
+      }
+
       this.current.view = null;
     }
   }

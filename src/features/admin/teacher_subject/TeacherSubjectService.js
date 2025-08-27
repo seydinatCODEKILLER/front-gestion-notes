@@ -17,6 +17,13 @@ export class TeacherSubjectService extends AbstractService {
     return response.data;
   }
 
+  async getTeacherSubjectsClasse(teacherId) {
+    const response = await this.get(
+      `teacher-subjects/teacherClass/${teacherId}`
+    );
+    return response.data;
+  }
+
   async getAssociation(id) {
     const response = await this.get(`teacher-subjects/${id}`);
     return response.data;

@@ -9,18 +9,24 @@ export class AdminTeacherSubjectView extends AbstractView {
     super(app, { params, route });
     this.controller = app.getController("teacherSubjects");
     this.teachers = [];
-    this.setup();
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-teacher-subject-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       this.teachers = await this.controller.getAllTeachers();
       this.createBanner();
       this.renderContent();
     } catch (error) {
-      console.log(error)
-      // this.showError("Erreur de chargement des professeurs");
+      console.error("Erreur de chargement des professeurs:", error);
+      this.handleActionError(error);
     }
   }
 
@@ -35,68 +41,32 @@ export class AdminTeacherSubjectView extends AbstractView {
       closable: true,
       timer: null,
     };
-
     this.banner = new Banner(bannerConfig);
     this.container.appendChild(this.banner.render());
   }
 
   renderContent() {
-    const content = document.createElement("div");
-    content.className = "p-6";
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.className = "p-6";
+    this.container.appendChild(this.content);
 
     const table = new ModernTable({
       itemsPerPage: 10,
       columns: [
-        {
-          header: "Nom",
-          key: "user.nom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.nom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Prénom",
-          key: "user.prenom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.prenom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Email",
-          key: "user.email",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.email || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Spécialité",
-          key: "specialite",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.specialite || "Non spécifié";
-            return span;
-          },
-        },
+        { header: "Nom", render: (t) => t.user?.nom || "N/A" },
+        { header: "Prénom", render: (t) => t.user?.prenom || "N/A" },
+        { header: "Email", render: (t) => t.user?.email || "N/A" },
+        { header: "Spécialité", render: (t) => t.specialite || "Non spécifié" },
         {
           header: "Statut",
-          key: "user.statut",
-          render: (item) => {
+          render: (t) => {
             const badge = document.createElement("span");
             badge.className =
               "badge " +
-              (item.user?.statut === "actif"
-                ? "badge-success"
-                : "badge-warning");
+              (t.user?.statut === "actif" ? "badge-success" : "badge-warning");
             badge.textContent =
-              item.user?.statut === "actif" ? "Actif" : "Inactif";
+              t.user?.statut === "actif" ? "Actif" : "Inactif";
             return badge;
           },
         },
@@ -116,56 +86,39 @@ export class AdminTeacherSubjectView extends AbstractView {
             label: "Affecter des matières",
             icon: "ri-screenshot-line",
             className: "btn-secondary",
-            visible: (item) => item.user?.statut === "actif",
+            visible: (t) => t.user?.statut === "actif",
           },
         ],
       },
-      onAction: async (action, id, actionType) =>
-        await this.handleTeacherAction(action, id, actionType),
+      onAction: (action, id, actionType) =>
+        this.handleTeacherAction(action, id, actionType),
     });
 
-    content.appendChild(table.render());
-    this.container.appendChild(content);
-    setTimeout(() => {
-        table.update(this.teachers,1);
-    }, 0);
+    this.content.appendChild(table.render());
+    table.update(this.teachers, 1);
   }
 
   async handleTeacherAction(action, teacherId, actionType) {
-    const teacher = this.findTeacherById(teacherId);
+    const teacher = this.teachers.find((t) => t.id == teacherId);
     if (!teacher) return;
 
     try {
-      switch (action) {
-        case "viewDetails":
-          await this.handleViewDetails(teacher);
-          break;
-        case "assignSubjects":
-          await this.handleAssignSubjects(teacher);
-          break;
-        default:
-          console.warn(`Action non gérée: ${action}`);
-      }
+      if (action === "viewDetails") await this._viewDetails(teacher);
+      else if (action === "assignSubjects") await this._assignSubjects(teacher);
+      else console.warn(`Action non gérée: ${action}`);
     } catch (error) {
       this.handleActionError(error);
     }
   }
 
-  findTeacherById(id) {
-    return this.teachers.find((t) => t.id == id);
-  }
-
-  async handleViewDetails(teacher) {
+  async _viewDetails(teacher) {
     const modal = new TeacherDetailsModal(this.app, teacher);
     await modal.open();
   }
 
-  async handleAssignSubjects(teacher) {
+  async _assignSubjects(teacher) {
     const modal = new AssignSubjectsModal(this.app, teacher, {
-      onSave: async () => {
-        // Recharger les données si nécessaire
-        this.app.eventBus.publish("teacher-subjects:updated");
-      },
+      onSave: () => this.app.eventBus.publish("teacher-subjects:updated"),
     });
     await modal.open();
   }
@@ -178,7 +131,13 @@ export class AdminTeacherSubjectView extends AbstractView {
     );
   }
 
-  cleanup() {
-    // Cleanup si nécessaire
+  beforeDestroy() {
+    this.banner?.close();
+    this.content?.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 }

@@ -18,6 +18,7 @@ export class TeacherSubjectView extends AbstractView {
       this.container.innerHTML = "";
       
       if (!this.currentTeacher) {
+        console.log(this.currentTeacher);
         this.showError("Utilisateur non connecté");
         return;
       }

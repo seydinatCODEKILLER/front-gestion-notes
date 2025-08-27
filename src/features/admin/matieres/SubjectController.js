@@ -121,7 +121,7 @@ export class SubjectController {
         return this.cache.subjects;
       }
 
-      const subjects = await this.service.getSubjectsByTeacher(teacherId);
+      const subjects = await this.service.getSubjectsByTeacherClass(teacherId);
       this.cache.subjects = subjects;
       this.cache.lastUpdated = Date.now();
       return subjects;

@@ -15,25 +15,34 @@ export class AdminTeacherView extends AbstractView {
     this.localTeachers = [];
 
     this.formModal = new TeacherFormModal(app, this.localTeachers, {
-      onSave: async () => {
-        this.localTeachers = await this.controller.loadTeachers(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshTeachers(),
     });
   }
 
-  async setup() {
+  async render() {
+    this.container = document.createElement("div");
+    this.container.className = "admin-teacher-view p-4 space-y-6";
+
+    await this._setup();
+    return this.container;
+  }
+
+  async _setup() {
     try {
-      this.container.innerHTML = "";
       this.localTeachers = await this.controller.loadTeachers();
       this.createBanner();
       this.renderViewToggle();
       this.renderContent();
       this.initFloatingButton();
     } catch (error) {
-      console.log(error)
-      // this.showError("Erreur de chargement des professeurs");
+      console.error("Erreur de chargement des professeurs:", error);
+      this.handleActionError(error);
     }
+  }
+
+  async _refreshTeachers() {
+    this.localTeachers = await this.controller.loadTeachers(true);
+    this.renderContent();
   }
 
   createBanner() {
@@ -45,7 +54,10 @@ export class AdminTeacherView extends AbstractView {
       title: "Gestion des professeurs",
       subtitle: "Ajoutez, modifiez et activez/désactivez vos professeurs",
       primaryText: `${this.localTeachers.length} professeur(s) enregistré(s)`,
-      secondaryText: `${activeTeachers.length} professeur(s) actif(s)`,
+      secondaryText:
+        activeTeachers.length > 0
+          ? `${activeTeachers.length} professeur(s) actif(s)`
+          : "Aucun professeur actif",
       icon: '<i class="ri-user-line text-2xl text-blue-600"></i>',
       variant: "default",
       closable: true,
@@ -53,33 +65,15 @@ export class AdminTeacherView extends AbstractView {
     };
 
     this.banner = new Banner(bannerConfig);
-    this.container.insertBefore(
-      this.banner.render(),
-      this.container.firstChild
-    );
-  }
-
-  closeBanner() {
-    this.banner?.close();
-  }
-
-  switchView(viewType) {
-    if (this.currentView !== viewType) {
-      this.currentView = viewType;
-
-      Object.entries(this.viewButtons).forEach(([type, button]) => {
-        button.className = this.getToggleButtonClass(type);
-      });
-      this.renderContent();
-    }
+    this.container.appendChild(this.banner.render());
   }
 
   renderViewToggle() {
     this.viewButtons = {};
-
-    const toggleGroup = document.createElement("div");
-    toggleGroup.className =
+    this.toggleGroup = document.createElement("div");
+    this.toggleGroup.className =
       "view-toggle-group flex rounded-lg mb-6 overflow-hidden px-3 mt-4";
+    this.container.appendChild(this.toggleGroup);
 
     ["cards", "table"].forEach((viewType) => {
       const button = document.createElement("button");
@@ -90,30 +84,31 @@ export class AdminTeacherView extends AbstractView {
           : '<i class="ri-table-fill mr-2"></i>Tableau';
 
       this.viewButtons[viewType] = button;
-
       button.addEventListener("click", () => this.switchView(viewType));
-      toggleGroup.appendChild(button);
+      this.toggleGroup.appendChild(button);
     });
+  }
 
-    this.container.appendChild(toggleGroup);
+  switchView(viewType) {
+    if (this.currentView !== viewType) {
+      this.currentView = viewType;
+      Object.entries(this.viewButtons).forEach(([type, button]) => {
+        button.className = this.getToggleButtonClass(type);
+      });
+      this.renderContent();
+    }
   }
 
   renderContent() {
-    const content =
-      this.container.querySelector("#content-container") ||
-      document.createElement("div");
-
-    content.id = "content-container";
-    content.innerHTML = "";
+    if (this.content) this.content.remove();
+    this.content = document.createElement("div");
+    this.content.id = "content-container";
+    this.container.appendChild(this.content);
 
     if (this.currentView === "cards") {
-      this.renderCardsView(content);
+      this.renderCardsView(this.content);
     } else {
-      this.renderTableView(content);
-    }
-
-    if (!this.container.querySelector("#content-container")) {
-      this.container.appendChild(content);
+      this.renderTableView(this.content);
     }
   }
 
@@ -150,59 +145,21 @@ export class AdminTeacherView extends AbstractView {
   }
 
   renderTableView(container) {
+    const isActive = (t) => t.user?.statut === "actif";
+
     const table = new ModernTable({
       itemsPerPage: 10,
       columns: [
-        {
-          header: "Nom",
-          key: "user.nom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.nom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Prénom",
-          key: "user.prenom",
-          sortable: true,
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.prenom || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Email",
-          key: "user.email",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.user?.email || "N/A";
-            return span;
-          },
-        },
-        {
-          header: "Spécialité",
-          key: "specialite",
-          render: (item) => {
-            const span = document.createElement("span");
-            span.textContent = item.specialite || "Non spécifié";
-            return span;
-          },
-        },
+        { header: "Nom", render: (item) => item.user?.nom || "N/A" },
+        { header: "Prénom", render: (item) => item.user?.prenom || "N/A" },
+        { header: "Email", render: (item) => item.user?.email || "N/A" },
+        { header: "Spécialité", render: (item) => item.specialite || "Non spécifié" },
         {
           header: "Statut",
-          key: "user.statut",
           render: (item) => {
             const badge = document.createElement("span");
-            badge.className =
-              "badge " +
-              (item.user?.statut === "actif"
-                ? "badge-success"
-                : "badge-warning");
-            badge.textContent =
-              item.user?.statut === "actif" ? "Actif" : "Inactif";
+            badge.className = "badge " + (isActive(item) ? "badge-success" : "badge-warning");
+            badge.textContent = isActive(item) ? "Actif" : "Inactif";
             return badge;
           },
         },
@@ -211,20 +168,12 @@ export class AdminTeacherView extends AbstractView {
       actions: {
         displayMode: "direct",
         items: [
-          {
-            name: "edit",
-            icon: "ri-edit-line",
-            className: "btn-primary",
-            visible: (item) => item.user?.statut === "actif",
-          },
+          { name: "edit", icon: "ri-edit-line", className: "btn-primary", visible: isActive },
           {
             name: "toggleStatus",
-            icon: (item) =>
-              item.user?.statut === "actif" ? "ri-close-line" : "ri-check-line",
-            className: (item) =>
-              item.user?.statut === "actif" ? "btn-error" : "btn-success",
-            action: (item) =>
-              item.user?.statut === "actif" ? "disable" : "enable",
+            icon: (t) => (isActive(t) ? "ri-close-line" : "ri-check-line"),
+            className: (t) => (isActive(t) ? "btn-error" : "btn-success"),
+            action: (t) => (isActive(t) ? "disable" : "enable"),
           },
         ],
       },
@@ -233,9 +182,7 @@ export class AdminTeacherView extends AbstractView {
     });
 
     container.appendChild(table.render());
-    setTimeout(() => {
-      table.update(this.localTeachers, 1);
-    }, 0);
+    table.update(this.localTeachers, 1);
   }
 
   initFloatingButton() {
@@ -244,63 +191,42 @@ export class AdminTeacherView extends AbstractView {
       color: "primary",
       position: "bottom-right",
       size: "lg",
-      onClick: () => {
-        this.formModal.open();
-      },
+      onClick: () => this.formModal.open(),
     });
   }
 
   async handleTeacherAction(action, id, actionType) {
-    const teacher = this.findTeacherById(id);
+    const teacher = this.localTeachers.find((t) => t.id == id);
     if (!teacher) return;
+
     try {
-      switch (action) {
-        case "edit":
-          await this.handleEditAction(teacher);
-          break;
-        case "toggleStatus":
-          await this.handleStatusToggle(id, actionType);
-          break;
-        default:
-          console.warn(`Action non gérée: ${action}`);
-      }
+      if (action === "edit") await this.handleEditAction(teacher);
+      else if (action === "toggleStatus") await this.handleStatusToggle(id, actionType);
+      else console.warn(`Action non gérée: ${action}`);
     } catch (error) {
       this.handleActionError(error);
     }
   }
 
-  findTeacherById(id) {
-    return this.localTeachers.find((t) => t.id == id);
-  }
-
   async handleEditAction(teacher) {
     const modal = new TeacherEditModal(this.app, teacher, {
-      onSave: async () => {
-        this.localTeachers = await this.controller.loadTeachers(true);
-        this.renderContent();
-      },
+      onSave: async () => await this._refreshTeachers(),
     });
     await modal.open();
   }
 
   async handleStatusToggle(id, actionType) {
-    const isDisableAction = actionType === "disable";
+    const isDisable = actionType === "disable";
     const confirmed = await this.showConfirmation(
-      isDisableAction ? "Désactiver ce professeur ?" : "Activer ce professeur ?"
+      isDisable ? "Désactiver ce professeur ?" : "Activer ce professeur ?"
     );
-
     if (!confirmed) return;
 
     try {
-      if (isDisableAction) {
-        await this.controller.deleteTeacher(id);
-      } else {
-        await this.controller.restoreTeacher(id);
-      }
+      if (isDisable) await this.controller.deleteTeacher(id);
+      else await this.controller.restoreTeacher(id);
 
-      // Recharger les données
-      this.localTeachers = await this.controller.loadTeachers(true);
-      this.renderContent();
+      await this._refreshTeachers();
     } catch (error) {
       this.handleActionError(error);
     }
@@ -327,9 +253,17 @@ export class AdminTeacherView extends AbstractView {
     });
   }
 
-  cleanup() {
-    if (this.fab) this.fab.destroy();
-    if (this.formModal) this.formModal.close();
+  beforeDestroy() {
+    this.fab?.remove?.();
+    this.formModal?.close();
+    this.banner?.close();
+    if (this.content) this.content.remove();
+    if (this.toggleGroup) this.toggleGroup.remove();
+  }
+
+  destroy() {
+    this.beforeDestroy();
+    this.container.innerHTML = "";
   }
 
   getToggleButtonClass(viewType) {
